@@ -19,7 +19,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
     const track = trackRef.current;
     const card = track?.querySelector<HTMLElement>("[data-slide]");
     if (!track || !card) return;
-    const slot = card.getBoundingClientRect().width + GAP_PX;
+    const slot = card.offsetWidth + GAP_PX;
     const max = track.scrollWidth - track.clientWidth;
     if (dir > 0 && track.scrollLeft >= max - 4) {
       track.scrollTo({ left: 0, behavior: "smooth" });
@@ -29,6 +29,38 @@ export function CardSlider({ children }: { children: ReactNode }) {
       track.scrollBy({ left: dir * slot, behavior: "smooth" });
     }
   }
+
+  function updateArc() {
+    const track = trackRef.current;
+    if (!track) return;
+    const rect = track.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const cards = track.querySelectorAll<HTMLElement>("[data-slide]");
+    for (const card of cards) {
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.left + cardRect.width / 2;
+      let pct = (cardCenter - center) / (rect.width / 2);
+      pct = Math.max(-1, Math.min(1, pct));
+      const abs = Math.abs(pct);
+      const scale = 1.06 - 0.24 * abs;
+      const rotate = pct * 13;
+      card.style.transform = `scale(${scale}) rotateY(${rotate}deg)`;
+      card.style.zIndex = String(Math.round(30 - abs * 26));
+      card.style.opacity = String(1 - abs * 0.4);
+    }
+  }
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    updateArc();
+    track.addEventListener("scroll", updateArc, { passive: true });
+    window.addEventListener("resize", updateArc);
+    return () => {
+      track.removeEventListener("scroll", updateArc);
+      window.removeEventListener("resize", updateArc);
+    };
+  }, []);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -88,7 +120,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div>
+    <div className="[perspective:1200px]">
       <div className="relative overflow-x-hidden">
         <div
           ref={trackRef}
@@ -97,7 +129,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
           onClickCapture={onClickCapture}
-          className="no-scrollbar -mx-4 flex select-none snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scroll-pl-[11vw] scroll-pr-[11vw] scroll-smooth sm:mx-0 sm:px-0 sm:scroll-pl-[calc((100%_-_45%)/2)] sm:scroll-pr-[calc((100%_-_45%)/2)] md:-mx-6 md:px-6 md:scroll-pl-[calc((100%_-_300px)/2)] md:scroll-pr-[calc((100%_-_300px)/2)] lg:cursor-grab lg:active:cursor-grabbing"
+          className="no-scrollbar -mx-4 flex select-none snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scroll-pl-[11vw] scroll-pr-[11vw] scroll-smooth sm:mx-0 sm:px-0 sm:scroll-pl-[calc((100%_-_45%)/2)] sm:scroll-pr-[calc((100%_-_45%)/2)] md:-mx-6 md:px-6 md:scroll-pl-[calc((100%_-_300px)/2)] md:scroll-pr-[calc((100%_-_300px)/2)] lg:cursor-grab lg:active:cursor-grabbing"
         >
           {children}
         </div>

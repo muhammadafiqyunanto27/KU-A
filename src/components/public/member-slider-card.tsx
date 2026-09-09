@@ -9,7 +9,7 @@ export function MemberSliderCard({ member }: { member: Profile }) {
     <Link
       href={`/members/${profileSlug(member)}`}
       data-slide
-      className="group w-[78vw] shrink-0 snap-center transition-transform duration-300 sm:w-[45%] md:w-[300px] lg:hover:scale-[1.02]"
+      className="group w-[78vw] shrink-0 snap-center transition-transform duration-300 sm:w-[45%] md:w-[300px]"
     >
       <div className="flex flex-col gap-4 pt-2">
         <div className="h-[44dvh] w-full overflow-hidden rounded-2xl border border-line-strong bg-surface-muted sm:h-auto sm:aspect-[3/4]">

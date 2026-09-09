@@ -3,7 +3,6 @@ import { CardSlider } from "@/components/public/card-slider";
 import { MemberSliderCard } from "@/components/public/member-slider-card";
 import { EmptyState } from "@/components/public/empty-state";
 import { Marquee } from "@/components/public/marquee";
-import { SectionLabel } from "@/components/public/section-label";
 import { getClassProfile, getMembers } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -40,17 +39,13 @@ export default async function LandingPage() {
     <>
       {/* Hero */}
       <section className="pb-8 pt-14 sm:pt-20">
-        <div className="flex flex-col items-center gap-6 text-center opacity-80">
-          <p className="rise-up text-xs font-medium uppercase tracking-[0.35em] text-cocoa">
-            Website Kelas
-          </p>
-
-          <h1 className="rise-up rise-up-delay-1 text-[22vw] font-extrabold leading-[0.9] tracking-tight text-ink sm:text-8xl lg:text-9xl">
+        <div className="flex flex-col items-center gap-5 text-center opacity-80">
+          <h1 className="rise-up text-[22vw] font-extrabold leading-[0.9] tracking-tight text-ink sm:text-8xl lg:text-9xl">
             {klass?.class_name ?? "KU-A"}
           </h1>
 
           {klass?.tagline ? (
-            <p className="rise-up rise-up-delay-2 max-w-xl text-xl font-medium text-ink sm:text-2xl">
+            <p className="rise-up rise-up-delay-1 max-w-xl text-xl font-medium text-ink sm:text-2xl">
               {klass.tagline}
             </p>
           ) : null}
@@ -66,9 +61,8 @@ export default async function LandingPage() {
       <Marquee />
 
       {/* Members */}
-      <section id="anggota" className="py-16 sm:py-24">
-        <SectionLabel num="01" label="Anggota" />
-        <div className="mt-6 flex items-end justify-between gap-4">
+      <section id="anggota" className="pt-10 sm:pt-16">
+        <div className="flex items-end justify-between gap-4">
           <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Profil &amp; portofolio
           </h2>
@@ -96,9 +90,8 @@ export default async function LandingPage() {
       </section>
 
       {/* Kontak */}
-      <section className="py-16 sm:py-20" id="kontak">
-        <SectionLabel num="02" label="Kontak" />
-        <h2 className="mt-6 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+      <section className="pb-10 pt-20 sm:pt-28" id="kontak">
+        <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
           Terhubung dengan kami
         </h2>
         <div className="mt-6 flex max-w-xl flex-col gap-3 text-sm text-ink-muted sm:text-base">
