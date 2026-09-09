@@ -4,7 +4,6 @@ import { getInitialsAvatarColor, initialsOf } from "@/lib/utils";
 
 export function MemberSliderCard({ member }: { member: Profile }) {
   const name = member.full_name ?? "Tanpa nama";
-  const handle = member.nickname ?? name;
 
   return (
     <Link
@@ -34,13 +33,10 @@ export function MemberSliderCard({ member }: { member: Profile }) {
         </div>
 
         <div>
-          <h3 className="font-semibold leading-snug text-ink transition-colors group-hover:text-cocoa">
+          <h3 className="truncate font-semibold leading-snug text-ink transition-colors group-hover:text-cocoa">
             {name}
           </h3>
-          <p className="mt-0.5 text-sm text-ink-muted">
-            {ROLE_LABELS[member.role]}
-            {member.nickname ? ` · “${member.nickname}”` : ""}
-          </p>
+          <p className="mt-0.5 text-sm text-ink-muted">{ROLE_LABELS[member.role]}</p>
           {member.skills && member.skills.length > 0 ? (
             <p className="mt-2 line-clamp-2 text-xs uppercase tracking-wide text-ink-faint">
               {member.skills.slice(0, 3).join("  ·  ")}
@@ -49,7 +45,7 @@ export function MemberSliderCard({ member }: { member: Profile }) {
         </div>
 
         <span className="inline-flex items-center gap-1 text-sm font-medium text-cocoa">
-          {handle}
+          Lihat profil
           <span className="transition-transform duration-200 group-hover:translate-x-0.5">
             →
           </span>

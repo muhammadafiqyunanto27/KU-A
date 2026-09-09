@@ -2,22 +2,42 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 const links = [
   { href: "/", label: "Beranda" },
-  { href: "/members", label: "Anggota" },
+  { href: "/#anggota", label: "Anggota" },
   { href: "/finance", label: "Keuangan" },
 ];
 
+function isActive(href: string, pathname: string, hash: string): boolean {
+  if (href.includes("#")) {
+    const [path, anchor] = href.split("#");
+    return pathname === path && hash === `#${anchor}`;
+  }
+  if (href === "/") {
+    return pathname === "/" && hash === "";
+  }
+  return pathname === href;
+}
+
 export function Navbar({ loggedIn }: { loggedIn: boolean }) {
   const pathname = usePathname();
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const update = () => setHash(window.location.hash);
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
 
   const tabs = [
     { href: "/", label: "Beranda", Icon: HomeIcon },
-    { href: "/members", label: "Anggota", Icon: UsersIcon },
+    { href: "/#anggota", label: "Anggota", Icon: UsersIcon },
     { href: "/finance", label: "Keuangan", Icon: WalletIcon },
     ...(loggedIn ? [{ href: "/dashboard", label: "Dashboard", Icon: GridIcon }] : []),
   ];
@@ -38,7 +58,7 @@ export function Navbar({ loggedIn }: { loggedIn: boolean }) {
                   href={link.href}
                   className={cn(
                     "px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === link.href
+                    isActive(link.href, pathname, hash)
                       ? "text-ink"
                       : "text-ink-muted hover:text-ink",
                   )}
@@ -62,7 +82,7 @@ export function Navbar({ loggedIn }: { loggedIn: boolean }) {
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden">
         <div className="flex items-stretch">
           {tabs.map((tab) => {
-            const active = pathname === tab.href;
+            const active = isActive(tab.href, pathname, hash);
             return (
               <Link
                 key={tab.href}

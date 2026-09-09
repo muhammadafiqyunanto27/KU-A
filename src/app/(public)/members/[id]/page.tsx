@@ -51,7 +51,7 @@ export default async function MemberPage({
   return (
     <>
       <Link
-        href="/members"
+        href="/#anggota"
         className="inline-flex items-center gap-1 py-6 text-sm text-ink-muted transition-colors hover:text-ink"
       >
         ← Anggota
@@ -72,9 +72,6 @@ export default async function MemberPage({
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
             {member.full_name ?? "Tanpa nama"}
           </h1>
-          {member.nickname ? (
-            <p className="mt-1 text-ink-muted">“{member.nickname}”</p>
-          ) : null}
           {member.bio ? (
             <p className="mt-5 text-ink-muted sm:text-lg">{member.bio}</p>
           ) : null}

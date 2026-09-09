@@ -61,7 +61,7 @@ export async function updateProfileAction(
   }
 
   revalidatePath("/dashboard/profile");
-  revalidatePath("/members");
+  revalidatePath("/");
 }
 
 export async function addPortfolioAction(

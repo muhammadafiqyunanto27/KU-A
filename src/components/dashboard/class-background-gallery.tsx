@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   addClassBackgroundsAction,
   removeClassBackgroundAction,
 } from "@/lib/actions/class";
-import {
-  uploadClassBackground,
-  deleteBackgroundFile,
-} from "@/lib/actions/upload";
+import { deleteBackgroundFile } from "@/lib/actions/upload";
 import type { ClassBackground } from "@/lib/types";
+
+const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
 type PendingBackground = { url: string; path: string | null };
 
@@ -21,6 +21,7 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
   const [files, setFiles] = useState<File[]>([]);
   const [uploaded, setUploaded] = useState<PendingBackground[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ name: string; pct: number } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -41,16 +42,37 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
     setUploading(true);
     setUploadError(null);
     const results: PendingBackground[] = [];
+    let failed = false;
     for (const file of files) {
-      const res = await uploadClassBackground(file);
-      if (!res.url) {
-        setUploadError(res.error ?? `Upload ${file.name} gagal.`);
+      if (!file.type.startsWith("image/")) {
+        setUploadError(`"${file.name}" bukan file gambar.`);
+        failed = true;
         break;
       }
-      results.push({ url: res.url, path: res.path ?? null });
+      if (file.size > MAX_SIZE_BYTES) {
+        setUploadError(`"${file.name}" melebihi batas 5 MB.`);
+        failed = true;
+        break;
+      }
+      try {
+        const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+        const pathname = `background/${crypto.randomUUID()}.${ext}`;
+        const blob = await upload(pathname, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+          onUploadProgress: ({ percentage }) =>
+            setUploadProgress({ name: file.name, pct: Math.round(percentage) }),
+        });
+        results.push({ url: blob.url, path: blob.pathname ?? null });
+      } catch (err) {
+        setUploadError(err instanceof Error ? err.message : `Upload "${file.name}" gagal.`);
+        failed = true;
+        break;
+      }
     }
     setUploading(false);
-    if (results.length === 0) return;
+    setUploadProgress(null);
+    if (failed || results.length === 0) return;
     setUploaded(results);
   }
 
@@ -132,14 +154,21 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <Input
-          label="Pilih Foto (bisa banyak)"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFiles}
-          className="file:mr-3 file:rounded-lg file:border-0 file:bg-surface-strong file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
-        />
+        <span className="grid gap-1">
+          <Input
+            label="Pilih Foto (bisa banyak)"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFiles}
+            className="file:mr-3 file:rounded-lg file:border-0 file:bg-surface-strong file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
+          />
+          {uploading && uploadProgress ? (
+            <p role="status" className="text-xs text-ink-muted">
+              Mengunggah {uploadProgress.name} — {uploadProgress.pct}%
+            </p>
+          ) : null}
+        </span>
         <Button
           type="button"
           variant="secondary"

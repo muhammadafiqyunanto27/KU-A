@@ -1,13 +1,10 @@
-import Link from "next/link";
 import { Metadata } from "next";
 import { CardSlider } from "@/components/public/card-slider";
 import { MemberSliderCard } from "@/components/public/member-slider-card";
-import { TransactionSliderCard } from "@/components/public/transaction-slider-card";
 import { EmptyState } from "@/components/public/empty-state";
 import { Marquee } from "@/components/public/marquee";
 import { SectionLabel } from "@/components/public/section-label";
-import { formatRupiah } from "@/lib/utils";
-import { getClassProfile, getFinanceTransactions, getMembers, summarizeFinance } from "@/lib/data";
+import { getClassProfile, getMembers } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Profil Kelas",
@@ -17,16 +14,13 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LandingPage() {
-  const [classResult, membersResult, financeResult] = await Promise.all([
+  const [classResult, membersResult] = await Promise.all([
     getClassProfile(),
     getMembers(),
-    getFinanceTransactions(),
   ]);
 
   const klass = classResult.data;
   const members = membersResult.data ?? [];
-  const transactions = financeResult.data ?? [];
-  const summary = summarizeFinance(financeResult.data);
 
   if (!klass && classResult.error) {
     return (
@@ -111,19 +105,13 @@ export default async function LandingPage() {
 
       <Marquee />
 
-      {/* Members preview */}
-      <section className="py-16 sm:py-24">
+      {/* Members */}
+      <section id="anggota" className="py-16 sm:py-24">
         <SectionLabel num="01" label="Anggota" />
         <div className="mt-6 flex items-end justify-between gap-4">
           <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Profil &amp; portofolio
           </h2>
-          <Link
-            href="/members"
-            className="shrink-0 text-sm font-medium text-cocoa hover:underline"
-          >
-            Semua anggota →
-          </Link>
         </div>
         <p className="mt-2 max-w-xl text-ink-muted">
           Kenalan dengan class KU-A dan lihat karya tiap anggota.
@@ -145,62 +133,6 @@ export default async function LandingPage() {
             </CardSlider>
           </div>
         )}
-      </section>
-
-      {/* Finance preview */}
-      <section className="py-16 sm:py-24">
-        <SectionLabel num="02" label="Kas Kelas" />
-        <div className="mt-6 flex items-end justify-between gap-4">
-          <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            Transparansi keuangan
-          </h2>
-          <Link
-            href="/finance"
-            className="shrink-0 text-sm font-medium text-cocoa hover:underline"
-          >
-            Laporan lengkap →
-          </Link>
-        </div>
-
-        {summary ? (
-          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[
-              { label: "Pemasukan", value: formatRupiah(summary.total_income) },
-              { label: "Pengeluaran", value: formatRupiah(summary.total_expense) },
-              { label: "Saldo Kas", value: formatRupiah(summary.balance) },
-            ].map((item, i) => (
-              <div key={item.label}>
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-ink-faint">
-                  {item.label}
-                </p>
-                <p
-                  className={[
-                    "mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl",
-                    i === 0 ? "text-sunshine" : i === 1 ? "text-sunrise" : "text-cocoa",
-                  ].join(" ")}
-                >
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-10 text-ink-muted">
-            {financeResult.error
-              ? "Data keuangan belum bisa dimuat karena Database belum dikonfigurasi."
-              : "Laporan kas akan tampil setelah bendahara mengisinya."}
-          </p>
-        )}
-
-        {transactions.length > 0 ? (
-          <div className="mt-10">
-            <CardSlider>
-              {transactions.map((tx) => (
-                <TransactionSliderCard key={tx.id} tx={tx} />
-              ))}
-            </CardSlider>
-          </div>
-        ) : null}
       </section>
 
       {/* CTA */}
