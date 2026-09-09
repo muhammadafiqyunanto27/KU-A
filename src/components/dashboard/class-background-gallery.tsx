@@ -10,15 +10,21 @@ import {
   removeClassBackgroundAction,
 } from "@/lib/actions/class";
 import { deleteBackgroundFile } from "@/lib/actions/upload";
+import { CropModal } from "@/components/dashboard/image-cropper";
 import type { ClassBackground } from "@/lib/types";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
 type PendingBackground = { url: string; path: string | null };
+type QueuedFile = { file: File; src: string };
+type CroppedFile = { blob: Blob; name: string; preview: string };
 
 export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }) {
   const router = useRouter();
-  const [files, setFiles] = useState<File[]>([]);
+  const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [queueIndex, setQueueIndex] = useState(0);
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropped, setCropped] = useState<CroppedFile[]>([]);
   const [uploaded, setUploaded] = useState<PendingBackground[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ name: string; pct: number } | null>(null);
@@ -26,46 +32,80 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
   const [applying, setApplying] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
-  const [previews, setPreviews] = useState<string[]>([]);
 
   function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
-    setFiles(selected);
-    setUploaded([]);
+    if (selected.length === 0) return;
+    const invalid = selected.find(
+      (f) => !f.type.startsWith("image/") || f.size > MAX_SIZE_BYTES,
+    );
+    if (invalid) {
+      setUploadError(
+        invalid.type.startsWith("image/")
+          ? `"${invalid.name}" melebihi batas 5 MB.`
+          : `"${invalid.name}" bukan file gambar.`,
+      );
+      return;
+    }
     setUploadError(null);
     setAddError(null);
-    setPreviews(selected.map((f) => URL.createObjectURL(f)));
+    setUploaded([]);
+    setCropped([]);
+    const items = selected.map((file) => ({ file, src: URL.createObjectURL(file) }));
+    setQueue(items);
+    setQueueIndex(0);
+    setCropOpen(true);
+  }
+
+  function pushCropped(blob: Blob, name: string) {
+    setCropped((prev) =>
+      prev.concat({ blob, name, preview: URL.createObjectURL(blob) }),
+    );
+  }
+
+  function advanceQueue() {
+    const current = queue[queueIndex];
+    if (current) URL.revokeObjectURL(current.src);
+    if (queueIndex + 1 < queue.length) {
+      setQueueIndex(queueIndex + 1);
+    } else {
+      setQueue([]);
+      setQueueIndex(0);
+      setCropOpen(false);
+    }
   }
 
   async function handleUpload() {
-    if (files.length === 0) return;
+    if (cropped.length === 0) return;
     setUploading(true);
     setUploadError(null);
     const results: PendingBackground[] = [];
     let failed = false;
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) {
-        setUploadError(`"${file.name}" bukan file gambar.`);
+    for (const item of cropped) {
+      if (!item.blob.type.startsWith("image/")) {
+        setUploadError(`"${item.name}" bukan file gambar.`);
         failed = true;
         break;
       }
-      if (file.size > MAX_SIZE_BYTES) {
-        setUploadError(`"${file.name}" melebihi batas 5 MB.`);
+      if (item.blob.size > MAX_SIZE_BYTES) {
+        setUploadError(`"${item.name}" melebihi batas 5 MB.`);
         failed = true;
         break;
       }
       try {
-        const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+        const ext = (item.name.split(".").pop() ?? "jpg").toLowerCase();
         const pathname = `background/${crypto.randomUUID()}.${ext}`;
-        const blob = await upload(pathname, file, {
+        const blob = await upload(pathname, item.blob, {
           access: "public",
           handleUploadUrl: "/api/upload",
           onUploadProgress: ({ percentage }) =>
-            setUploadProgress({ name: file.name, pct: Math.round(percentage) }),
+            setUploadProgress({ name: item.name, pct: Math.round(percentage) }),
         });
         results.push({ url: blob.url, path: blob.pathname ?? null });
       } catch (err) {
-        setUploadError(err instanceof Error ? err.message : `Upload "${file.name}" gagal.`);
+        setUploadError(
+          err instanceof Error ? err.message : `Upload "${item.name}" gagal.`,
+        );
         failed = true;
         break;
       }
@@ -88,9 +128,9 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
       setApplying(false);
       return;
     }
+    for (const item of cropped) URL.revokeObjectURL(item.preview);
     setUploaded([]);
-    setPreviews([]);
-    setFiles([]);
+    setCropped([]);
     setApplying(false);
     router.refresh();
   }
@@ -106,13 +146,16 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
     router.refresh();
   }
 
+  const current = queue[queueIndex];
+
   return (
     <div className="glass flex flex-col gap-4 rounded-2xl p-6">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h3 className="text-sm font-semibold text-ink">Foto Background (Slideshow)</h3>
           <p className="mt-0.5 text-xs text-ink-muted">
-            Tampil bergantian di latar seluruh halaman, berganti tiap 2 detik. Bisa upload beberapa sekaligus.
+            Tampil bergantian di latar seluruh halaman, berganti tiap 2 detik. Foto bisa diatur
+            (crop) dulu sebelum diunggah.
           </p>
         </div>
         <span className="text-xs font-medium text-cocoa">{images.length} foto aktif</span>
@@ -142,12 +185,12 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
         </div>
       )}
 
-      {previews.length > 0 ? (
+      {cropped.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {previews.map((preview) => (
-            <div key={preview} className="aspect-[4/3] overflow-hidden rounded-xl border border-line-strong">
+          {cropped.map((item) => (
+            <div key={item.preview} className="aspect-[4/3] overflow-hidden rounded-xl border border-line-strong">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview} alt="Pratinjau" className="h-full w-full object-cover" />
+              <img src={item.preview} alt="Pratinjau" className="h-full w-full object-cover" />
             </div>
           ))}
         </div>
@@ -173,11 +216,11 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
           type="button"
           variant="secondary"
           onClick={handleUpload}
-          disabled={files.length === 0 || uploading}
+          disabled={cropped.length === 0 || uploading}
           loading={uploading}
           className="sm:w-auto"
         >
-          {uploading ? "Mengunggah…" : "Upload"}
+          {uploading ? "Mengunggah…" : `Upload ${cropped.length} Foto`}
         </Button>
       </div>
 
@@ -204,6 +247,23 @@ export function ClassBackgroundGallery({ images }: { images: ClassBackground[] }
             {applying ? "Menyimpan…" : `Terapkan ${uploaded.length} Foto`}
           </Button>
         </div>
+      ) : null}
+
+      {cropOpen && current ? (
+        <CropModal
+          src={current.src}
+          onSkip={() => {
+            pushCropped(current.file, current.file.name);
+            advanceQueue();
+          }}
+          onDone={(blob) => {
+            pushCropped(
+              blob,
+              current.file.name.replace(/\.(jpe?g|png|webp|gif)$/i, ".jpg"),
+            );
+            advanceQueue();
+          }}
+        />
       ) : null}
     </div>
   );

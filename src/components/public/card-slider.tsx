@@ -15,15 +15,15 @@ export function CardSlider({ children }: { children: ReactNode }) {
 
   return (
     <div>
-      <div className="relative">
+      <div className="relative overflow-x-hidden">
         <div
           ref={trackRef}
           className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-2 sm:mx-0 sm:px-0 md:-mx-6 md:px-6"
         >
           {children}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-10 bg-gradient-to-r from-background to-transparent lg:block" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-10 bg-gradient-to-l from-background to-transparent lg:block" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-10 bg-gradient-to-r from-background to-transparent lg:block" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-10 bg-gradient-to-l from-background to-transparent lg:block" />
       </div>
 
       <div className="mt-3 hidden items-center justify-end gap-2 lg:flex">

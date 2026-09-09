@@ -20,7 +20,9 @@ export default async function LandingPage() {
   ]);
 
   const klass = classResult.data;
-  const members = membersResult.data ?? [];
+  const members = (membersResult.data ?? []).filter(
+    (m) => m.role === "anggota",
+  );
 
   if (!klass && classResult.error) {
     return (
