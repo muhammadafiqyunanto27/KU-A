@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ROLE_LABELS, type Profile } from "@/lib/types";
-import { getInitialsAvatarColor, initialsOf } from "@/lib/utils";
+import { getInitialsAvatarColor, initialsOf, profileSlug } from "@/lib/utils";
 
 export function MemberSliderCard({ member }: { member: Profile }) {
   const name = member.full_name ?? "Tanpa nama";
 
   return (
     <Link
-      href={`/members/${member.id}`}
+      href={`/members/${profileSlug(member)}`}
       data-slide
       className="group w-[72vw] max-w-[300px] shrink-0 snap-start"
     >

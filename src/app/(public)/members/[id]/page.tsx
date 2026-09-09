@@ -3,10 +3,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/public/empty-state";
-import { getMemberById, getPortfoliosByUser } from "@/lib/data";
-import { ROLE_LABELS } from "@/lib/types";
+import { getMembers, getPortfoliosByUser } from "@/lib/data";
+import { ROLE_LABELS, type Profile } from "@/lib/types";
+import { isUuid, profileSlug } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+async function resolveMember(
+  idOrSlug: string,
+): Promise<{ member: Profile | null; error?: string }> {
+  const list = await getMembers();
+  if (list.error) return { member: null, error: list.error };
+  const members = list.data ?? [];
+  if (isUuid(idOrSlug)) {
+    return { member: members.find((m) => m.id === idOrSlug) ?? null };
+  }
+  const expected = idOrSlug.toLowerCase();
+  return { member: members.find((m) => profileSlug(m) === expected) ?? null };
+}
 
 export async function generateMetadata({
   params,
@@ -14,9 +28,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const result = await getMemberById(id);
+  const { member } = await resolveMember(id);
   return {
-    title: result.data?.full_name ?? "Anggota",
+    title: member?.full_name ?? "Anggota",
   };
 }
 
@@ -26,15 +40,15 @@ export default async function MemberPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [memberResult, portfoliosResult] = await Promise.all([
-    getMemberById(id),
+  const [{ member, error }, portfoliosResult] = await Promise.all([
+    resolveMember(id),
     getPortfoliosByUser(id),
   ]);
 
-  const member = memberResult.data;
+  const portfolios = member ? (portfoliosResult.data ?? []) : [];
 
   if (!member) {
-    if (memberResult.error) {
+    if (error) {
       return (
         <EmptyState
           title="Belum bisa dimuat"
@@ -46,7 +60,6 @@ export default async function MemberPage({
   }
 
   const socials = member.socials ?? {};
-  const portfolios = portfoliosResult.data ?? [];
 
   return (
     <>

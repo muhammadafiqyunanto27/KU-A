@@ -45,6 +45,30 @@ export function socialHandle(url?: string | null): string {
   }
 }
 
+export function slugify(name?: string | null): string {
+  return (name ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function profileSlug(member: {
+  full_name?: string | null;
+  id: string;
+}): string {
+  return slugify(member.full_name) || slugify(member.id);
+}
+
+export function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
 export function getInitialsAvatarColor(name?: string | null): string {
   const hue = name
     ? name.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360
