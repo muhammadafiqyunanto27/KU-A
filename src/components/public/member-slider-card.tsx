@@ -9,16 +9,16 @@ export function MemberSliderCard({ member }: { member: Profile }) {
     <Link
       href={`/members/${profileSlug(member)}`}
       data-slide
-      className="group w-[72vw] max-w-[300px] shrink-0 snap-start"
+      className="group w-[78vw] shrink-0 snap-center transition-transform duration-300 sm:w-[45%] md:w-[300px] lg:hover:scale-[1.02]"
     >
-      <div className="flex flex-col gap-4 border-t border-line pt-5">
-        <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line-strong bg-surface-muted">
+      <div className="flex flex-col gap-4 pt-2">
+        <div className="h-[44dvh] w-full overflow-hidden rounded-2xl border border-line-strong bg-surface-muted sm:h-auto sm:aspect-[3/4]">
           {member.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={member.avatar_url}
               alt={name}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03] sm:object-cover"
             />
           ) : (
             <div

@@ -20,7 +20,10 @@ export function BackgroundCarousel({ urls }: { urls: string[] }) {
   }, [urls.length]);
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 bottom-0 top-16 -z-10 overflow-hidden sm:top-[4.5rem]"
+    >
       {urls.map((url, i) => (
         <Image
           key={url}

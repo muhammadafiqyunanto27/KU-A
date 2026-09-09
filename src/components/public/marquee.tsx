@@ -16,7 +16,7 @@ export function Marquee() {
   );
 
   return (
-    <section className="overflow-hidden py-5">
+    <section className="-mt-2 overflow-hidden pb-6 pt-1 sm:-mt-4">
       <div className="marquee-track flex w-max">
         {strip(1)}
         {strip(2)}

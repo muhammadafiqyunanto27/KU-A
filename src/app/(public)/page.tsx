@@ -39,8 +39,8 @@ export default async function LandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="py-14 sm:py-24">
-        <div className="flex flex-col gap-6">
+      <section className="pb-8 pt-14 sm:pt-20">
+        <div className="flex flex-col items-center gap-6 text-center opacity-80">
           <p className="rise-up text-xs font-medium uppercase tracking-[0.35em] text-cocoa">
             Website Kelas
           </p>
@@ -60,48 +60,6 @@ export default async function LandingPage() {
               {klass.description}
             </p>
           ) : null}
-
-          <div className="rise-up rise-up-delay-3 flex flex-col gap-4 pt-2">
-            {Object.values(socials).some(Boolean) ? (
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-muted">
-                {Object.entries(socials).map(([key, value]) =>
-                  value ? (
-                    <a
-                      key={key}
-                      href={value.startsWith("http") ? value : `https://${value}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1 capitalize hover:text-ink"
-                    >
-                      {key}
-                      <span className="text-cocoa">↗</span>
-                    </a>
-                  ) : null,
-                )}
-              </div>
-            ) : null}
-
-            {Object.values(contact).some(Boolean) ? (
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-muted">
-                {contact.email ? (
-                  <a href={`mailto:${contact.email}`} className="hover:text-ink">
-                    {contact.email}
-                  </a>
-                ) : null}
-                {contact.phone ? (
-                  <a href={`tel:${contact.phone}`} className="hover:text-ink">
-                    {contact.phone}
-                  </a>
-                ) : null}
-                {contact.schedule ? <span>{contact.schedule}</span> : null}
-                {contact.address ? (
-                  <span className="flex items-center gap-1">
-                    {contact.address}
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
         </div>
       </section>
 
@@ -137,17 +95,71 @@ export default async function LandingPage() {
         )}
       </section>
 
-      {/* CTA */}
-      <section className="py-16">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.35em] text-cocoa">
-              Ikut berkarya
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Anggota KU-A? Kelola profil kamu.
-            </h2>
-          </div>
+      {/* Kontak */}
+      <section className="py-16 sm:py-20" id="kontak">
+        <SectionLabel num="02" label="Kontak" />
+        <h2 className="mt-6 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          Terhubung dengan kami
+        </h2>
+        <div className="mt-6 flex max-w-xl flex-col gap-3 text-sm text-ink-muted sm:text-base">
+          {Object.entries(socials).map(([key, value]) =>
+            value ? (
+              <a
+                key={key}
+                href={value.startsWith("http") ? value : `https://${value}`}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-baseline gap-3 hover:text-ink"
+              >
+                <span className="w-20 shrink-0 text-xs font-medium uppercase tracking-wide text-ink-faint">
+                  {key}
+                </span>
+                <span className="break-all underline decoration-dotted underline-offset-4 group-hover:no-underline">
+                  {value.replace(/^https?:\/\//, "")}
+                </span>
+              </a>
+            ) : null,
+          )}
+          {contact.email ? (
+            <a
+              href={`mailto:${contact.email}`}
+              className="group flex items-baseline gap-3 hover:text-ink"
+            >
+              <span className="w-20 shrink-0 text-xs font-medium uppercase tracking-wide text-ink-faint">
+                Email
+              </span>
+              <span className="break-all underline decoration-dotted underline-offset-4 group-hover:no-underline">
+                {contact.email}
+              </span>
+            </a>
+          ) : null}
+          {contact.phone ? (
+            <a
+              href={`tel:${contact.phone}`}
+              className="group flex items-baseline gap-3 hover:text-ink"
+            >
+              <span className="w-20 shrink-0 text-xs font-medium uppercase tracking-wide text-ink-faint">
+                Telepon
+              </span>
+              <span>{contact.phone}</span>
+            </a>
+          ) : null}
+          {contact.schedule ? (
+            <span className="flex items-baseline gap-3">
+              <span className="w-20 shrink-0 text-xs font-medium uppercase tracking-wide text-ink-faint">
+                Jadwal
+              </span>
+              <span>{contact.schedule}</span>
+            </span>
+          ) : null}
+          {contact.address ? (
+            <span className="flex items-baseline gap-3">
+              <span className="w-20 shrink-0 text-xs font-medium uppercase tracking-wide text-ink-faint">
+                Alamat
+              </span>
+              <span>{contact.address}</span>
+            </span>
+          ) : null}
         </div>
       </section>
     </>
