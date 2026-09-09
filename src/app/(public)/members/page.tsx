@@ -36,7 +36,7 @@ export default async function MembersPage() {
           title="Belum ada anggota"
           description={
             result.error
-              ? "Data belum bisa dimuat karena Database belum dikonfigurasi."
+              ? `Error memuat: ${result.error}`
               : "Profil anggota akan tampil di sini setelah diisi."
           }
         />
