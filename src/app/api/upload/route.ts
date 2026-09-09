@@ -27,7 +27,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = (await request.formData()) as unknown as HandleUploadBody;
+  let body: HandleUploadBody;
+  try {
+    body = (await request.json()) as HandleUploadBody;
+  } catch {
+    return NextResponse.json(
+      { error: "Body request tidak valid." },
+      { status: 400 },
+    );
+  }
 
   try {
     const response = await handleUpload({
@@ -43,7 +51,6 @@ export async function POST(request: NextRequest) {
           addRandomSuffix: false,
         };
       },
-      onUploadCompleted: async () => {},
     });
     return NextResponse.json(response);
   } catch (error) {

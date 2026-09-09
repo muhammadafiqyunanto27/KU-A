@@ -33,11 +33,17 @@ export async function readSession(
     const { payload } = await jwtVerify(token, secret(), {
       algorithms: ["HS256"],
     });
-    if (typeof payload.id !== "string" || typeof payload.role !== "string") {
+    const id =
+      typeof payload.sub === "string"
+        ? payload.sub
+        : typeof payload.id === "string"
+          ? payload.id
+          : null;
+    if (!id || typeof payload.role !== "string") {
       return null;
     }
     return {
-      id: payload.id,
+      id,
       email: typeof payload.email === "string" ? payload.email : "",
       role: payload.role as Role,
     };
