@@ -61,7 +61,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
       const wide = w >= 640;
       const faceW = wide
         ? clamp(Math.round(w * 0.15), 170, 190)
-        : clamp(Math.round(w * 0.42), 130, 150);
+        : clamp(Math.round(w * 0.45), 145, 168);
       const faceH = Math.round(faceW * 1.55);
       const radius = clamp(Math.round(faceW * 4.6), 620, 1000);
       const persp = Math.round(radius * 3.2);
