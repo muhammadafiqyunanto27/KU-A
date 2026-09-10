@@ -92,7 +92,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
 
     const renderRing = () => {
       if (ringRef.current) {
-        ringRef.current.style.transform = `rotateY(${rot.current.toFixed(3)}deg)`;
+        ringRef.current.style.transform = `translateY(-10px) rotateY(${rot.current.toFixed(3)}deg)`;
       }
     };
 
