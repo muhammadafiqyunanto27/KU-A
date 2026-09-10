@@ -1,28 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export type Theme = "light" | "dark";
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem("theme");
+const STORAGE_KEY = "theme";
+
+let current: Theme = "light";
+let initialized = false;
+const listeners = new Set<() => void>();
+
+function readStoredTheme(): Theme {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
 
+function ensureInit() {
+  if (initialized) return;
+  initialized = true;
+  current = readStoredTheme();
+}
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
+function getSnapshot(): Theme {
+  ensureInit();
+  return current;
+}
+
+function getServerSnapshot(): Theme {
+  return "light";
+}
+
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem("theme", theme);
+  const toggle = useCallback(() => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    current = next;
+    document.documentElement.classList.toggle("dark", next === "dark");
+    window.localStorage.setItem(STORAGE_KEY, next);
+    listeners.forEach((l) => l());
   }, [theme]);
-
-  const toggle = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   return { theme, toggle };
 }

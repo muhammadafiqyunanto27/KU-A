@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import "react-image-crop/dist/ReactCrop.css";
 import "./globals.css";
 
@@ -22,7 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={`${inter.variable} antialiased`} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-ink">
-        <Script id="theme-init" src="/theme-init.js" strategy="beforeInteractive" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");var dark=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;if(dark)document.documentElement.classList.add("dark")}catch(e){}})()`,
+          }}
+        />
         {children}
       </body>
     </html>

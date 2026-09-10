@@ -9,10 +9,11 @@ import {
 } from "react";
 
 const DRAG_GAIN = 0.45;
-const DECAY = 0.955;
-const AUTOPLAY_DEG_S = 26;
+const DECAY = 0.97;
+const AUTOPLAY_DEG_S = 12;
 const SNAP_HOLD_MS = 1900;
-const MAX_SPEED = 7;
+const MAX_SPEED = 3;
+const DRAG_THRESHOLD = 8;
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -31,9 +32,9 @@ export function CardSlider({ children }: { children: ReactNode }) {
   const [canvas, setCanvas] = useState({
     faceW: 180,
     faceH: 279,
-    radius: 432,
-    persp: 1469,
-    stageH: 452,
+    radius: 828,
+    persp: 2650,
+    stageH: 462,
   });
 
   const rot = useRef(0);
@@ -43,6 +44,8 @@ export function CardSlider({ children }: { children: ReactNode }) {
   const lastT = useRef(0);
   const lastInteract = useRef(0);
   const moved = useRef(false);
+  const dragAcc = useRef(0);
+  const captured = useRef(false);
   const reduced = useRef(false);
 
   useEffect(() => {
@@ -59,8 +62,8 @@ export function CardSlider({ children }: { children: ReactNode }) {
         ? clamp(Math.round(w * 0.15), 170, 190)
         : clamp(Math.round(w * 0.42), 130, 150);
       const faceH = Math.round(faceW * 1.55);
-      const radius = clamp(Math.round(faceW * 2.4), 360, 520);
-      const persp = Math.round(radius * 3.4);
+      const radius = clamp(Math.round(faceW * 4.6), 620, 1000);
+      const persp = Math.round(radius * 3.2);
       const scale = persp / (persp - radius);
       setCanvas({
         faceW,
@@ -137,10 +140,11 @@ export function CardSlider({ children }: { children: ReactNode }) {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     phase.current = "drag";
     moved.current = false;
+    dragAcc.current = 0;
+    captured.current = false;
     lastX.current = e.clientX;
     lastT.current = performance.now();
     vel.current = 0;
-    stageRef.current?.setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
@@ -150,7 +154,13 @@ export function CardSlider({ children }: { children: ReactNode }) {
     const instVel = ((-dx * DRAG_GAIN) / dtMs) * 16.67;
     lastX.current = e.clientX;
     lastT.current = performance.now();
-    if (Math.abs(dx) > 2) moved.current = true;
+
+    dragAcc.current += dx;
+    if (!captured.current && Math.abs(dragAcc.current) > DRAG_THRESHOLD) {
+      moved.current = true;
+      captured.current = true;
+      stageRef.current?.setPointerCapture(e.pointerId);
+    }
 
     vel.current =
       vel.current === 0
@@ -159,12 +169,16 @@ export function CardSlider({ children }: { children: ReactNode }) {
     rot.current -= dx * DRAG_GAIN;
   }
 
-  function endDrag() {
+  function endDrag(e: React.PointerEvent<HTMLDivElement>) {
     if (phase.current === "drag") {
       vel.current = clamp(vel.current, -MAX_SPEED, MAX_SPEED);
       lastInteract.current = performance.now();
       phase.current = reduced.current ? "idle" : "inertia";
     }
+    if (captured.current && stageRef.current?.hasPointerCapture(e.pointerId)) {
+      stageRef.current.releasePointerCapture(e.pointerId);
+    }
+    captured.current = false;
   }
 
   return (
