@@ -195,7 +195,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
           moved.current = false;
         }
       }}
-      className="relative w-full touch-pan-y select-none overflow-hidden lg:cursor-grab lg:active:cursor-grabbing"
+      className="relative w-full touch-pan-y select-none overflow-hidden cursor-grab active:cursor-grabbing"
       style={{
         height: stageH,
         perspective: persp,

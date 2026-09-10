@@ -31,7 +31,7 @@ export function MemberSliderCard({ member }: { member: Profile }) {
       </div>
 
       <div className="pt-3">
-        <h3 className="truncate font-semibold leading-snug text-ink">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-ink">
           {name}
         </h3>
         <p className="mt-0.5 text-sm text-ink-muted">
