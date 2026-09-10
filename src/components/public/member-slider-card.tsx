@@ -32,23 +32,25 @@ export function MemberSliderCard({ member }: { member: Profile }) {
       </div>
 
       <div className="flex h-[88px] shrink-0 flex-col pt-2">
-        <h3 className="truncate text-[11px] font-semibold leading-tight text-ink">
+        <h3 className="line-clamp-2 text-[11px] font-semibold leading-tight text-ink">
           {name}
         </h3>
-        <p className="mt-1 text-[10px] text-ink-muted">
-          {ROLE_LABELS[member.role]}
-        </p>
         {member.skills && member.skills.length > 0 ? (
           <p className="line-clamp-1 text-[9px] uppercase tracking-wide text-ink-faint">
             {member.skills.slice(0, 3).join("  ·  ")}
           </p>
         ) : null}
-        <span className="mt-auto inline-flex items-center gap-1 pt-1 text-[11px] font-medium text-cocoa">
-          Lihat profil
-          <span className="transition-transform duration-200 group-hover:translate-x-0.5">
-            →
+        <div className="mt-auto pt-1">
+          <p className="text-[10px] text-ink-muted">
+            {ROLE_LABELS[member.role]}
+          </p>
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-cocoa">
+            Lihat profil
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+              →
+            </span>
           </span>
-        </span>
+        </div>
       </div>
     </Link>
   );
