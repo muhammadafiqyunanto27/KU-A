@@ -32,7 +32,7 @@ export function MemberSliderCard({ member }: { member: Profile }) {
       </div>
 
       <div className="flex h-[100px] shrink-0 flex-col pt-2">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-ink">
+        <h3 className="truncate text-xs font-semibold leading-tight text-ink">
           {name}
         </h3>
         <p className="mt-1 text-xs text-ink-muted">
