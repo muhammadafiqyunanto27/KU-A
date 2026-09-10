@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { PortfolioManager } from "@/components/dashboard/portfolio-manager";
 import { CertificateManager } from "@/components/dashboard/certificate-manager";
@@ -15,7 +16,7 @@ export default async function DashboardProfilePage() {
   const session = await getSessionProfile();
 
   if (!session) {
-    return null;
+    redirect("/login?next=/dashboard/profile");
   }
 
   const [portfoliosResult, certificatesResult] = await Promise.all([

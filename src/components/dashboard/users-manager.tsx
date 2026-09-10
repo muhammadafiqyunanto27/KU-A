@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -32,12 +33,16 @@ function UserRow({
   currentUserId: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   const onChange = (role: string) => {
     const form = new FormData();
     form.set("user_id", user.id);
     form.set("role", role);
-    startTransition(() => void updateUserRoleAction(form));
+    startTransition(async () => {
+      await updateUserRoleAction(form);
+      router.refresh();
+    });
   };
 
   return (

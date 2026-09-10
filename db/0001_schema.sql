@@ -117,7 +117,7 @@ values
   ('00000000-0000-4000-8000-000000000013', '4.43.26.0.19@ku-a.test', crypt('4.43.26.0.19', gen_salt('bf', 10)), 'MARSAULINA GRACE HERNI SIAHAAN', '4.43.26.0.19', 'anggota'),
   ('00000000-0000-4000-8000-000000000014', '4.43.26.0.20@ku-a.test', crypt('4.43.26.0.20', gen_salt('bf', 10)), 'MUHAMMAD AFIQ YUNANTO', '4.43.26.0.20', 'anggota'),
   ('00000000-0000-4000-8000-000000000015', '4.43.26.0.21@ku-a.test', crypt('4.43.26.0.21', gen_salt('bf', 10)), 'MUHAMMAD JAMALUDDIN', '4.43.26.0.21', 'anggota'),
-  ('00000000-0000-4000-8000-000000000016', '4.43.26.0.22@ku-a.test', crypt('4.43.26.0.22', gen_salt('bf', 10)), 'NADIA AMALIA NURSIFY''', '4.43.26.0.22', 'anggota'),
+  ('00000000-0000-4000-8000-000000000016', '4.43.26.0.22@ku-a.test', crypt('4.43.26.0.22', gen_salt('bf', 10)), 'NADIA AMALIA NURSIFY', '4.43.26.0.22', 'anggota'),
   ('00000000-0000-4000-8000-000000000017', '4.43.26.0.23@ku-a.test', crypt('4.43.26.0.23', gen_salt('bf', 10)), 'NAJWA NAILA AZ ZAHRA', '4.43.26.0.23', 'anggota'),
   ('00000000-0000-4000-8000-000000000018', '4.43.26.0.24@ku-a.test', crypt('4.43.26.0.24', gen_salt('bf', 10)), 'RAFIF HANA SALSABILA', '4.43.26.0.24', 'anggota'),
   ('00000000-0000-4000-8000-000000000019', '4.43.26.0.25@ku-a.test', crypt('4.43.26.0.25', gen_salt('bf', 10)), 'SABRINA CITRA CORNEANTO', '4.43.26.0.25', 'anggota'),

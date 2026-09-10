@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
-import type { Role } from "@/lib/types";
+import { ROLES, type Role } from "@/lib/types";
 
 export const SESSION_COOKIE = "ku_a_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
@@ -39,7 +39,11 @@ export async function readSession(
         : typeof payload.id === "string"
           ? payload.id
           : null;
-    if (!id || typeof payload.role !== "string") {
+    if (
+      !id ||
+      typeof payload.role !== "string" ||
+      !ROLES.includes(payload.role as Role)
+    ) {
       return null;
     }
     return {

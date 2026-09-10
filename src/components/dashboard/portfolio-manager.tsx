@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import {
 import type { Portfolio } from "@/lib/types";
 
 export function PortfolioManager({ portfolios }: { portfolios: Portfolio[] }) {
+  const router = useRouter();
   const [state, action, pending] = useActionState(
     (_prev: { error: string } | void, formData: FormData) =>
       addPortfolioAction(formData),
@@ -90,7 +92,10 @@ export function PortfolioManager({ portfolios }: { portfolios: Portfolio[] }) {
                   setDeleteId(item.id);
                   const form = new FormData();
                   form.set("id", item.id);
-                  deletePortfolioAction(form).then(() => setDeleteId(null));
+                  deletePortfolioAction(form).then(() => {
+                    setDeleteId(null);
+                    router.refresh();
+                  });
                 }}
               >
                 Hapus

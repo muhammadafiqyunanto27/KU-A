@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 import { AdaptiveAmount } from "@/components/ui/adaptive-amount";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -176,10 +177,12 @@ export function FinanceManager({
 }
 
 function DeleteTransaction({ id }: { id: string }) {
-  const run = () => {
+  const router = useRouter();
+  const run = async () => {
     const form = new FormData();
     form.set("id", id);
-    return deleteTransactionAction(form);
+    await deleteTransactionAction(form);
+    router.refresh();
   };
   return (
     <button

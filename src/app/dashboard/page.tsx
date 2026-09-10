@@ -55,7 +55,7 @@ export default async function DashboardHomePage() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-2xl font-bold text-ink sm:text-3xl">
-          Halo, {session.profile?.nickname ?? session.profile?.full_name ?? "teman"} 👋
+          Halo, {session.profile?.nickname ?? session.profile?.full_name ?? "teman"}
         </h1>
         <p className="mt-1 text-sm text-ink-muted">
           Kamu masuk sebagai <span className="font-medium text-cocoa">{ROLE_LABELS[role]}</span>.

@@ -213,9 +213,11 @@ export async function addCertificateAction(
   const title = String(formData.get("title") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
   const path = String(formData.get("path") ?? "").trim();
+  const blobPattern =
+    /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/certificate\//;
 
   if (!title) return { error: "Nama sertifikat wajib diisi." };
-  if (!url || !path.startsWith(`certificate/${ctx.userId}/`)) {
+  if (!url || !blobPattern.test(url) || !path.startsWith(`certificate/${ctx.userId}/`)) {
     return { error: "Foto sertifikat belum diunggah dengan benar." };
   }
 
