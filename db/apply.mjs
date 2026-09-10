@@ -17,7 +17,8 @@ if (!url) {
   process.exit(1);
 }
 
-const schemaPath = new URL("../db/0001_schema.sql", import.meta.url);
+const schemaName = process.argv[2] ?? "0001_schema.sql";
+const schemaPath = new URL(`../db/${schemaName}`, import.meta.url);
 const schema = readFileSync(schemaPath, "utf8");
 
 const sql = neon(url);

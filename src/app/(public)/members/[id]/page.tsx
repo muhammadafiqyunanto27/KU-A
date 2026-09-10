@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/public/empty-state";
-import { getMembers, getPortfoliosByUser } from "@/lib/data";
+import { getCertificatesByUser, getMembers, getPortfoliosByUser } from "@/lib/data";
 import { ROLE_LABELS, type Profile } from "@/lib/types";
 import { isUuid, profileSlug } from "@/lib/utils";
 
@@ -40,12 +40,15 @@ export default async function MemberPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [{ member, error }, portfoliosResult] = await Promise.all([
-    resolveMember(id),
-    getPortfoliosByUser(id),
-  ]);
+  const [{ member, error }, portfoliosResult, certificatesResult] =
+    await Promise.all([
+      resolveMember(id),
+      getPortfoliosByUser(id),
+      getCertificatesByUser(id),
+    ]);
 
   const portfolios = member ? (portfoliosResult.data ?? []) : [];
+  const certificates = member ? (certificatesResult.data ?? []) : [];
 
   if (!member) {
     if (error) {
@@ -180,6 +183,48 @@ export default async function MemberPage({
                     <span>↗</span>
                   </a>
                 ) : null}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Certificates */}
+      <section className="py-12">
+        <div className="flex items-end justify-between gap-4">
+          <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+            Sertifikat
+          </h2>
+          <span className="text-sm text-ink-faint">
+            {certificates.length} sertifikat
+          </span>
+        </div>
+
+        {certificates.length === 0 ? (
+          <EmptyState
+            title="Belum ada sertifikat"
+            description="Sertifikat akan tampil di sini setelah anggota mengunggahnya."
+          />
+        ) : (
+          <div className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {certificates.map((cert) => (
+              <article key={cert.id} className="flex flex-col gap-3 border-t border-line pt-5">
+                {cert.image_url ? (
+                  <a
+                    href={cert.image_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cert.image_url}
+                      alt={cert.title}
+                      className="aspect-[4/3] w-full rounded-xl border border-line-strong object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                    />
+                  </a>
+                ) : null}
+                <h3 className="font-semibold leading-snug text-ink">{cert.title}</h3>
               </article>
             ))}
           </div>

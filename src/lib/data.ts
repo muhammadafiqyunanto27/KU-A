@@ -1,5 +1,6 @@
 import { query, queryOne } from "@/lib/db";
 import type {
+  Certificate,
   ClassBackground,
   ClassProfile,
   FinanceSummary,
@@ -68,6 +69,19 @@ export function getPortfoliosByUser(
     return (
       (await query<Portfolio>(
         `select * from portfolios where user_id = $1 order by created_at desc`,
+        [userId],
+      )) ?? []
+    );
+  });
+}
+
+export function getCertificatesByUser(
+  userId: string,
+): Promise<Result<Certificate[]>> {
+  return run(async () => {
+    return (
+      (await query<Certificate>(
+        `select * from certificates where user_id = $1 order by created_at desc`,
         [userId],
       )) ?? []
     );

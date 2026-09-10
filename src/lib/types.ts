@@ -101,6 +101,15 @@ export interface Portfolio {
   updated_at: string;
 }
 
+export interface Certificate {
+  id: string;
+  user_id: string;
+  title: string;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type TransactionType = "income" | "expense";
 
 export interface FinanceTransaction {

@@ -203,3 +203,69 @@ export async function deletePortfolioAction(
 
   revalidatePath("/dashboard/profile");
 }
+
+export async function addCertificateAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  const ctx = await getAuthorizedUser();
+  if (!ctx) redirect("/login");
+
+  const title = String(formData.get("title") ?? "").trim();
+  const url = String(formData.get("url") ?? "").trim();
+  const path = String(formData.get("path") ?? "").trim();
+
+  if (!title) return { error: "Nama sertifikat wajib diisi." };
+  if (!url || !path.startsWith(`certificate/${ctx.userId}/`)) {
+    return { error: "Foto sertifikat belum diunggah dengan benar." };
+  }
+
+  try {
+    await query(
+      `insert into certificates (user_id, title, image_url)
+       values ($1, $2, $3)`,
+      [ctx.userId, title, url],
+    );
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Gagal menambah sertifikat.",
+    };
+  }
+
+  revalidatePath("/dashboard/profile");
+}
+
+export async function deleteCertificateAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  const ctx = await getAuthorizedUser();
+  if (!ctx) redirect("/login");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Sertifikat tidak ditemukan." };
+
+  try {
+    const existing = await queryOne<{ user_id: string; image_url: string | null }>(
+      `select user_id, image_url from certificates where id = $1`,
+      [id],
+    );
+    if (!existing || existing.user_id !== ctx.userId) {
+      return { error: "Anda tidak berhak menghapus sertifikat ini." };
+    }
+
+    await query(`delete from certificates where id = $1 and user_id = $2`, [
+      id,
+      ctx.userId,
+    ]);
+
+    const old = existing.image_url;
+    if (old && old.includes("blob.vercel-storage.com")) {
+      await del(old).catch(() => null);
+    }
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Gagal menghapus sertifikat.",
+    };
+  }
+
+  revalidatePath("/dashboard/profile");
+}

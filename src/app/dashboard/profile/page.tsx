@@ -1,8 +1,9 @@
 import { Metadata } from "next";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { PortfolioManager } from "@/components/dashboard/portfolio-manager";
+import { CertificateManager } from "@/components/dashboard/certificate-manager";
 import { getSessionProfile } from "@/lib/auth";
-import { getPortfoliosByUser } from "@/lib/data";
+import { getCertificatesByUser, getPortfoliosByUser } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Profil Saya",
@@ -17,8 +18,12 @@ export default async function DashboardProfilePage() {
     return null;
   }
 
-  const portfoliosResult = await getPortfoliosByUser(session.user.id);
+  const [portfoliosResult, certificatesResult] = await Promise.all([
+    getPortfoliosByUser(session.user.id),
+    getCertificatesByUser(session.user.id),
+  ]);
   const portfolios = portfoliosResult.data ?? [];
+  const certificates = certificatesResult.data ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,6 +36,7 @@ export default async function DashboardProfilePage() {
 
       <ProfileForm profile={session.profile} />
       <PortfolioManager portfolios={portfolios} />
+      <CertificateManager certificates={certificates} />
     </div>
   );
 }

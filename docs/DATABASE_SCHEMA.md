@@ -61,6 +61,16 @@
 | `tags` | text[] | |
 | `created_at` / `updated_at` | timestamptz | |
 
+### `certificates` — sertifikat per anggota
+
+| Kolom | Tipe | Catatan |
+|---|---|---|
+| `id` | uuid PK | |
+| `user_id` | uuid FK → profiles (cascade) | |
+| `title` | text | |
+| `image_url` | text | foto sertifikat (blob `certificate/<userId>/…`) |
+| `created_at` / `updated_at` | timestamptz | |
+
 ### `finance_transactions` — kas class
 
 | Kolom | Tipe | Catatan |
@@ -78,6 +88,8 @@
 
 - Schema + seed awal: `db/0001_schema.sql`.
 - Migrasi `db/0002_roles.sql`: menambah role `wakil_ketua_kelas` & `sekretaris`, dan menghapus akun khusus `ketua@ku-a.test` / `bendahara@ku-a.test` (pengurus sekarang user nyata ber-role).
+- Migrasi `db/0003_certificates.sql`: tabel `certificates` untuk upload sertifikat per anggota.
+- `node db/apply.mjs <nama-file>` untuk menjalankan migrasi.
 
 `db/0001_schema.sql` berisi:
 
