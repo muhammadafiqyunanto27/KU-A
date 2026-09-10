@@ -8,11 +8,11 @@ import {
   type ReactNode,
 } from "react";
 
-const DRAG_GAIN = 0.45;
-const DECAY = 0.97;
-const AUTOPLAY_DEG_S = 12;
-const SNAP_HOLD_MS = 1900;
-const MAX_SPEED = 3;
+const DRAG_GAIN = 0.3;
+const DECAY = 0.96;
+const AUTOPLAY_DEG_S = 5;
+const SNAP_HOLD_MS = 2200;
+const MAX_SPEED = 1.5;
 const DRAG_THRESHOLD = 8;
 
 const clamp = (v: number, min: number, max: number) =>
