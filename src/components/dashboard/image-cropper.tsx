@@ -13,9 +13,9 @@ type Aspect = number;
 
 const PRESETS: { label: string; value: Aspect }[] = [
   { label: "Web (16:9)", value: 16 / 9 },
-  { label: "Bebas", value: 0 },
-  { label: "4:3", value: 4 / 3 },
   { label: "1:1", value: 1 },
+  { label: "4:3", value: 4 / 3 },
+  { label: "Bebas", value: 0 },
 ];
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -85,14 +85,16 @@ export function CropModal({
   src,
   onSkip,
   onDone,
+  defaultAspect = 16 / 9,
 }: {
   src: string;
   onSkip: () => void;
   onDone: (blob: Blob) => void;
+  defaultAspect?: Aspect;
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<PixelCrop>();
-  const [aspect, setAspect] = useState<Aspect>(16 / 9);
+  const [aspect, setAspect] = useState<Aspect>(defaultAspect);
   const [pixelCrop, setPixelCrop] = useState<PixelCrop | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

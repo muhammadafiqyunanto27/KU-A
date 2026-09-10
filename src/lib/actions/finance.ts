@@ -8,7 +8,12 @@ import type { Role, TransactionType } from "@/lib/types";
 
 type ActionResult = { error: string } | void;
 
-const ALLOWED_ROLES: Role[] = ["super_admin", "bendahara"];
+const ALLOWED_ROLES: Role[] = [
+  "super_admin",
+  "ketua_kelas",
+  "wakil_ketua_kelas",
+  "bendahara",
+];
 
 async function getAuthorized(): Promise<{ userId: string } | null> {
   const session = await getSessionProfile();

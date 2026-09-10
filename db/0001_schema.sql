@@ -18,7 +18,7 @@ create table if not exists profiles (
   full_name text,
   nickname text,
   role text not null default 'anggota'
-    check (role in ('super_admin', 'ketua_kelas', 'bendahara', 'anggota')),
+    check (role in ('super_admin', 'ketua_kelas', 'wakil_ketua_kelas', 'bendahara', 'sekretaris', 'anggota')),
   avatar_url text,
   bio text,
   skills text[] default '{}',
@@ -86,7 +86,7 @@ create table if not exists finance_transactions (
 create index if not exists finance_transactions_date_idx on finance_transactions (date desc);
 
 -- =============================================================
--- SEED — 30 siswa + 3 admin
+-- SEED — 30 siswa + 1 admin
 -- =============================================================
 
 insert into class_profile (class_name)
@@ -128,10 +128,10 @@ values
   ('00000000-0000-4000-8000-00000000001e', '4.43.26.0.30@ku-a.test', crypt('4.43.26.0.30', gen_salt('bf', 10)), 'WARDAHTUL SANI', '4.43.26.0.30', 'anggota')
 on conflict (id) do nothing;
 
--- 3 akun khusus (password random tapi mudah diingat — GANTI setelah first login)
+-- 1 akun khusus (password random tapi mudah diingat — GANTI setelah first login)
+-- Pengurus (ketua/wakil/bendahara/sekretaris) bukanlah user khusus; role diberikan
+-- ke siswa oleh Super Admin lewat /dashboard/users.
 insert into profiles (id, email, password_hash, full_name, nickname, role)
 values
-  ('00000000-0000-4000-8000-0000000000fa', 'superadmin@ku-a.test', crypt('BintangTua#91', gen_salt('bf', 10)), 'Super Admin', 'superadmin', 'super_admin'),
-  ('00000000-0000-4000-8000-0000000000fb', 'ketua@ku-a.test', crypt('PantaiSenja@33', gen_salt('bf', 10)), 'Ketua Kelas', 'ketua', 'ketua_kelas'),
-  ('00000000-0000-4000-8000-0000000000fc', 'bendahara@ku-a.test', crypt('GunungSalju$17', gen_salt('bf', 10)), 'Bendahara', 'bendahara', 'bendahara')
+  ('00000000-0000-4000-8000-0000000000fa', 'superadmin@ku-a.test', crypt('BintangTua#91', gen_salt('bf', 10)), 'Super Admin', 'superadmin', 'super_admin')
 on conflict (id) do nothing;

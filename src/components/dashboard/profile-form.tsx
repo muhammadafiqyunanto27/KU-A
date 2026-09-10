@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AvatarUploader } from "@/components/dashboard/avatar-uploader";
 import { updateProfileAction } from "@/lib/actions/profile";
 import type { Profile } from "@/lib/types";
 
@@ -15,7 +16,10 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
   );
 
   return (
-    <form action={action} className="glass flex flex-col gap-4 rounded-2xl p-6">
+    <>
+      <AvatarUploader profile={profile} />
+
+      <form action={action} className="glass flex flex-col gap-4 rounded-2xl p-6">
       <h2 className="text-lg font-semibold text-ink">Informasi Dasar</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -68,5 +72,6 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
         {pending ? "Menyimpan…" : "Simpan Profil"}
       </Button>
     </form>
+    </>
   );
 }

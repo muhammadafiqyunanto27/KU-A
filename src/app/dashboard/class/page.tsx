@@ -18,7 +18,12 @@ export default async function DashboardClassPage() {
   }
 
   const role = session.profile?.role ?? "anggota";
-  if (role !== "super_admin" && role !== "ketua_kelas") {
+  if (
+    role !== "super_admin" &&
+    role !== "ketua_kelas" &&
+    role !== "wakil_ketua_kelas" &&
+    role !== "sekretaris"
+  ) {
     redirect("/dashboard");
   }
 

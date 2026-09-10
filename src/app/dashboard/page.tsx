@@ -20,10 +20,20 @@ const LINKS_BY_ROLE: Record<Role, { href: string; label: string; desc: string }[
   ],
   ketua_kelas: [
     { href: "/dashboard/class", label: "Profil Kelas", desc: "Edit tampilan profil class." },
+    { href: "/dashboard/finance", label: "Keuangan", desc: "Kelola kas & laporan." },
+    { href: "/dashboard/profile", label: "Profil Saya", desc: "Edit profil & portofolio kamu." },
+  ],
+  wakil_ketua_kelas: [
+    { href: "/dashboard/class", label: "Profil Kelas", desc: "Edit tampilan profil class." },
+    { href: "/dashboard/finance", label: "Keuangan", desc: "Kelola kas & laporan." },
     { href: "/dashboard/profile", label: "Profil Saya", desc: "Edit profil & portofolio kamu." },
   ],
   bendahara: [
     { href: "/dashboard/finance", label: "Keuangan", desc: "Kelola kas & laporan." },
+    { href: "/dashboard/profile", label: "Profil Saya", desc: "Edit profil & portofolio kamu." },
+  ],
+  sekretaris: [
+    { href: "/dashboard/class", label: "Profil Kelas", desc: "Edit tampilan profil class." },
     { href: "/dashboard/profile", label: "Profil Saya", desc: "Edit profil & portofolio kamu." },
   ],
   anggota: [

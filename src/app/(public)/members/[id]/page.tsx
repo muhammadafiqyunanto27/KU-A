@@ -14,7 +14,7 @@ async function resolveMember(
 ): Promise<{ member: Profile | null; error?: string }> {
   const list = await getMembers();
   if (list.error) return { member: null, error: list.error };
-  const members = (list.data ?? []).filter((m) => m.role === "anggota");
+  const members = (list.data ?? []).filter((m) => m.role !== "super_admin");
   if (isUuid(idOrSlug)) {
     return { member: members.find((m) => m.id === idOrSlug) ?? null };
   }

@@ -38,7 +38,7 @@ export default async function LandingPage() {
 
   const klass = classResult.data;
   const members = (membersResult.data ?? []).filter(
-    (m) => m.role === "anggota",
+    (m) => m.role !== "super_admin",
   );
 
   if (!klass && classResult.error) {

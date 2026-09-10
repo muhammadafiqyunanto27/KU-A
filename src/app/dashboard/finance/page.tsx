@@ -18,7 +18,12 @@ export default async function DashboardFinancePage() {
   }
 
   const role = session.profile?.role ?? "anggota";
-  if (role !== "super_admin" && role !== "bendahara") {
+  if (
+    role !== "super_admin" &&
+    role !== "ketua_kelas" &&
+    role !== "wakil_ketua_kelas" &&
+    role !== "bendahara"
+  ) {
     redirect("/dashboard");
   }
 

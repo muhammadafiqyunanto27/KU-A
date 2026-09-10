@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { del } from "@vercel/blob";
 import { getSessionProfile } from "@/lib/auth";
 import { query, queryOne } from "@/lib/db";
 
@@ -58,6 +59,43 @@ export async function updateProfileAction(
     );
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Gagal menyimpan profil." };
+  }
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/");
+}
+
+export async function updateAvatarAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  const ctx = await getAuthorizedUser();
+  if (!ctx) redirect("/login");
+
+  const url = String(formData.get("avatar_url") ?? "").trim();
+  const path = String(formData.get("avatar_path") ?? "").trim();
+  const blobPattern =
+    /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/avatar\//;
+  if (!url || !path || !blobPattern.test(url) || !path.startsWith(`avatar/${ctx.userId}/`)) {
+    return { error: "URL foto tidak valid." };
+  }
+
+  try {
+    const current = await queryOne<{ avatar_url: string | null }>(
+      `select avatar_url from profiles where id = $1`,
+      [ctx.userId],
+    );
+
+    await query(
+      `update profiles set avatar_url = $2, updated_at = now() where id = $1`,
+      [ctx.userId, url],
+    );
+
+    const old = current?.avatar_url;
+    if (old && old !== url && old.includes("blob.vercel-storage.com")) {
+      await del(old).catch(() => null);
+    }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Gagal menyimpan foto." };
   }
 
   revalidatePath("/dashboard/profile");

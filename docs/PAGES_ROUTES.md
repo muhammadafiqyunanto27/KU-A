@@ -23,21 +23,21 @@
 | Route | Halaman | Role yang boleh | Isi |
 |---|---|---|---|
 | `/dashboard` | Home dashboard | semua peran | Ringkasan & quick links sesuai role |
-| `/dashboard/profile` | Edit profil sendiri | semua peran | Edit info pribadi + portofolio sendiri |
-| `/dashboard/class` | Edit profil class | `super_admin`, `ketua_kelas` | Update heading/gambar/teks/sosmed/kontak class |
-| `/dashboard/finance` | Manajemen keuangan | `super_admin`, `bendahara` | CRUD transaksi, kategori, ringkasan, bukti |
+| `/dashboard/profile` | Edit profil sendiri | semua peran | Upload foto, edit info pribadi + portofolio sendiri |
+| `/dashboard/class` | Edit profil class | `super_admin`, `ketua_kelas`, `wakil_ketua_kelas`, `sekretaris` | Update heading/gambar/teks/sosmed/kontak class |
+| `/dashboard/finance` | Manajemen keuangan | `super_admin`, `ketua_kelas`, `wakil_ketua_kelas`, `bendahara` | CRUD transaksi, kategori, ringkasan, bukti |
 | `/dashboard/users` | Manajemen user | `super_admin` | Lihat/kelola user, ubah role |
 
 ## Diagram Proteksi
 
 ```
 Request
-  └─ middleware.ts (cek sesi)
+  └─ proxy.ts (cek sesi)
        ├─ route publik            → diteruskan
        └─ route /dashboard/...    → wajib login
             ├─ /dashboard/users   → role super_admin
-            ├─ /dashboard/class   → super_admin | ketua_kelas
-            ├─ /dashboard/finance → super_admin | bendahara
+            ├─ /dashboard/class   → super_admin | ketua_kelas | wakil_ketua_kelas | sekretaris
+            ├─ /dashboard/finance → super_admin | ketua_kelas | wakil_ketua_kelas | bendahara
             └─ /dashboard/profile → semua (hanya edit dirinya)
 ```
 

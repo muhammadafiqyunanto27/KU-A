@@ -16,10 +16,10 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Beranda", roles: ["super_admin", "ketua_kelas", "bendahara", "anggota"] },
-  { href: "/dashboard/profile", label: "Profil Saya", roles: ["super_admin", "ketua_kelas", "bendahara", "anggota"] },
-  { href: "/dashboard/class", label: "Profil Kelas", roles: ["super_admin", "ketua_kelas"] },
-  { href: "/dashboard/finance", label: "Keuangan", roles: ["super_admin", "bendahara"] },
+  { href: "/dashboard", label: "Beranda", roles: ["super_admin", "ketua_kelas", "wakil_ketua_kelas", "bendahara", "sekretaris", "anggota"] },
+  { href: "/dashboard/profile", label: "Profil Saya", roles: ["super_admin", "ketua_kelas", "wakil_ketua_kelas", "bendahara", "sekretaris", "anggota"] },
+  { href: "/dashboard/class", label: "Profil Kelas", roles: ["super_admin", "ketua_kelas", "wakil_ketua_kelas", "sekretaris"] },
+  { href: "/dashboard/finance", label: "Keuangan", roles: ["super_admin", "ketua_kelas", "wakil_ketua_kelas", "bendahara"] },
   { href: "/dashboard/users", label: "Anggota & Role", roles: ["super_admin"] },
 ];
 

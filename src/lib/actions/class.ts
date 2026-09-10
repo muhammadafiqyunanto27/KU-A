@@ -7,7 +7,12 @@ import type { HeroStyle, Role, TextStyle } from "@/lib/types";
 
 type ActionResult = { error: string } | void;
 
-const ALLOWED_ROLES: Role[] = ["super_admin", "ketua_kelas"];
+const ALLOWED_ROLES: Role[] = [
+  "super_admin",
+  "ketua_kelas",
+  "wakil_ketua_kelas",
+  "sekretaris",
+];
 
 type ClassAdminSession = { ok: true; userId: string } | { ok: false; error: string };
 

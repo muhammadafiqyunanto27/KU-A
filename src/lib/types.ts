@@ -1,11 +1,26 @@
-export type Role = "super_admin" | "ketua_kelas" | "bendahara" | "anggota";
+export type Role =
+  | "super_admin"
+  | "ketua_kelas"
+  | "wakil_ketua_kelas"
+  | "bendahara"
+  | "sekretaris"
+  | "anggota";
 
-export const ROLES: Role[] = ["super_admin", "ketua_kelas", "bendahara", "anggota"];
+export const ROLES: Role[] = [
+  "super_admin",
+  "ketua_kelas",
+  "wakil_ketua_kelas",
+  "bendahara",
+  "sekretaris",
+  "anggota",
+];
 
 export const ROLE_LABELS: Record<Role, string> = {
   super_admin: "Super Admin",
   ketua_kelas: "Ketua Kelas",
+  wakil_ketua_kelas: "Wakil Ketua Kelas",
   bendahara: "Bendahara",
+  sekretaris: "Sekretaris",
   anggota: "Anggota",
 };
 

@@ -3,8 +3,8 @@ import { readSession, SESSION_COOKIE } from "@/lib/session";
 import type { Role } from "@/lib/types";
 
 const ROLE_REQUIREMENTS: Record<string, Role[]> = {
-  "/dashboard/class": ["super_admin", "ketua_kelas"],
-  "/dashboard/finance": ["super_admin", "bendahara"],
+  "/dashboard/class": ["super_admin", "ketua_kelas", "wakil_ketua_kelas", "sekretaris"],
+  "/dashboard/finance": ["super_admin", "ketua_kelas", "wakil_ketua_kelas", "bendahara"],
   "/dashboard/users": ["super_admin"],
 };
 

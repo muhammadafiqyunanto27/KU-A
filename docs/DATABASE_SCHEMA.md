@@ -21,8 +21,8 @@
 | `password_hash` | text | hash bcrypt (pgcrypto `crypt`) |
 | `full_name` | text | |
 | `nickname` | text | |
-| `role` | text | `super_admin`/`ketua_kelas`/`bendahara`/`anggota` |
-| `avatar_url` | text | |
+| `role` | text | `super_admin`/`ketua_kelas`/`wakil_ketua_kelas`/`bendahara`/`sekretaris`/`anggota` |
+| `avatar_url` | text | foto profil (blob `avatar/<userId>/…`) |
 | `bio` | text | |
 | `skills` | text[] | |
 | `socials` | jsonb | `{instagram, github, linkedin, whatsapp, email}` |
@@ -76,13 +76,14 @@
 
 ## Seed
 
+- Schema + seed awal: `db/0001_schema.sql`.
+- Migrasi `db/0002_roles.sql`: menambah role `wakil_ketua_kelas` & `sekretaris`, dan menghapus akun khusus `ketua@ku-a.test` / `bendahara@ku-a.test` (pengurus sekarang user nyata ber-role).
+
 `db/0001_schema.sql` berisi:
 
 - 30 siswa: NIS `4.43.26.0.01`–`0.30`, email `<NIS>@ku-a.test`, password = NIS, role `anggota`.
-- 3 akun khusus:
+- 1 akun khusus:
   - `superadmin@ku-a.test` / `BintangTua#91` — role `super_admin`
-  - `ketua@ku-a.test` / `PantaiSenja@33` — role `ketua_kelas`
-  - `bendahara@ku-a.test` / `GunungSalju$17` — role `bendahara`
-- Seluruh akun hasil seed WAJIB ganti password setelah login (belum ada fitur ganti password — awaiting future or handled via SQL).
+- Pengurus (ketua/wakil/bendahara/sekretaris) dipilih dari siswa oleh Super Admin.
 
-Kredensial seed dipakai untuk testing; jangan dipakai di produksi.
+Kredensial seed dipakai untuk testing; jangan dipakai di produksi. Password wajib diganti setelah login.

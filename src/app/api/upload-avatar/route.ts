@@ -1,34 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getSessionProfile } from "@/lib/auth";
-import type { Role } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-const ALLOWED_ROLES: Role[] = [
-  "super_admin",
-  "ketua_kelas",
-  "wakil_ketua_kelas",
-  "sekretaris",
-];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
-const IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/avif",
-  "image/heic",
-  "image/heif",
-];
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const ALLOWED_EXT = ["jpg", "png", "webp", "avif"];
 
 export async function POST(request: NextRequest) {
   const session = await getSessionProfile();
-  if (!session?.profile || !ALLOWED_ROLES.includes(session.profile.role)) {
+  if (!session) {
     return NextResponse.json(
-      { error: "Anda tidak berhak mengunggah foto." },
-      { status: 403 },
+      { error: "Silakan masuk terlebih dahulu." },
+      { status: 401 },
     );
   }
 
@@ -47,12 +33,15 @@ export async function POST(request: NextRequest) {
       body,
       request,
       onBeforeGenerateToken: async (pathname) => {
-        if (!pathname.startsWith("background/")) {
+        if (!pathname.startsWith("avatar/")) {
           throw new Error("Path upload tidak valid.");
         }
+        const ext = (pathname.split(".").pop() ?? "jpg").toLowerCase();
+        const safeExt = ALLOWED_EXT.includes(ext) ? ext : "jpg";
         return {
           allowedContentTypes: IMAGE_TYPES,
           maximumSizeInBytes: MAX_SIZE_BYTES,
+          pathname: `avatar/${session.user.id}/${crypto.randomUUID()}.${safeExt}`,
           addRandomSuffix: false,
         };
       },
