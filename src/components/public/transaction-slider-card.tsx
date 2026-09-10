@@ -1,3 +1,4 @@
+import { AdaptiveAmount } from "@/components/ui/adaptive-amount";
 import { formatDate, formatRupiah } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { FinanceTransaction } from "@/lib/types";
@@ -31,10 +32,12 @@ export function TransactionSliderCard({ tx }: { tx: FinanceTransaction }) {
         </time>
       </div>
 
-      <p className={cn("mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl", income ? "text-sunshine" : "text-sunrise")}>
-        {income ? "+" : "−"}
-        {formatRupiah(Number(tx.amount))}
-      </p>
+      <AdaptiveAmount
+        value={`${income ? "+" : "−"} ${formatRupiah(Number(tx.amount))}`}
+        className={cn("mt-4", income ? "text-sunshine" : "text-sunrise")}
+        base={28}
+        min={15}
+      />
 
       <p className="mt-2 line-clamp-2 text-sm text-ink">{tx.description ?? "—"}</p>
 

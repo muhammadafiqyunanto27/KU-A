@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { AdaptiveAmount } from "@/components/ui/adaptive-amount";
 import { CardSlider } from "@/components/public/card-slider";
 import { TransactionSliderCard } from "@/components/public/transaction-slider-card";
 import { EmptyState } from "@/components/public/empty-state";
@@ -65,9 +66,12 @@ export default async function FinancePage() {
                 <p className="text-xs font-medium uppercase tracking-[0.25em] text-ink-faint">
                   {item.label}
                 </p>
-                <p className={`mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl ${item.valueClass}`}>
-                  {item.value}
-                </p>
+                <AdaptiveAmount
+                  value={item.value}
+                  className={`mt-3 ${item.valueClass}`}
+                  base={36}
+                  min={16}
+                />
               </div>
             ))}
           </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { AdaptiveAmount } from "@/components/ui/adaptive-amount";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,21 +33,30 @@ export function FinanceManager({
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card>
             <p className="text-sm text-ink-muted">Pemasukan</p>
-            <p className="mt-1 text-xl font-bold text-sunshine sm:text-2xl">
-              {formatRupiah(summary.total_income)}
-            </p>
+            <AdaptiveAmount
+              value={formatRupiah(summary.total_income)}
+              className="mt-1 text-sunshine"
+              base={22}
+              min={15}
+            />
           </Card>
           <Card>
             <p className="text-sm text-ink-muted">Pengeluaran</p>
-            <p className="mt-1 text-xl font-bold text-sunrise sm:text-2xl">
-              {formatRupiah(summary.total_expense)}
-            </p>
+            <AdaptiveAmount
+              value={formatRupiah(summary.total_expense)}
+              className="mt-1 text-sunrise"
+              base={22}
+              min={15}
+            />
           </Card>
           <Card>
             <p className="text-sm text-ink-muted">Saldo Kas</p>
-            <p className="mt-1 text-xl font-bold text-cocoa sm:text-2xl">
-              {formatRupiah(summary.balance)}
-            </p>
+            <AdaptiveAmount
+              value={formatRupiah(summary.balance)}
+              className="mt-1 text-cocoa"
+              base={22}
+              min={15}
+            />
           </Card>
         </section>
       ) : null}

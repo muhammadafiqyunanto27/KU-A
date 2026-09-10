@@ -34,12 +34,12 @@ export function BackgroundCarousel({ urls }: { urls: string[] }) {
           sizes="100vw"
           unoptimized
           className={cn(
-            "object-cover object-center transition-opacity duration-1000",
+            "object-cover object-center transition-opacity duration-1000 max-sm:scale-110 max-sm:blur-[4px]",
             i === index ? "opacity-100" : "opacity-0",
           )}
         />
       ))}
-      <div className="absolute inset-0 bg-white/65 dark:bg-black/65" />
+      <div className="absolute inset-0 bg-white/65 dark:bg-black/65 max-sm:bg-white/70 dark:max-sm:bg-black/75" />
     </div>
   );
 }
