@@ -2,9 +2,10 @@ import { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { CardSlider } from "@/components/public/card-slider";
 import { MemberSliderCard } from "@/components/public/member-slider-card";
+import { MobileBackground } from "@/components/public/mobile-background";
 import { EmptyState } from "@/components/public/empty-state";
 import { Marquee } from "@/components/public/marquee";
-import { getClassProfile, getMembers } from "@/lib/data";
+import { getClassBackgrounds, getClassProfile, getMembers } from "@/lib/data";
 import type { TextStyle } from "@/lib/types";
 
 const FONTS: Record<string, string> = {
@@ -31,15 +32,17 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LandingPage() {
-  const [classResult, membersResult] = await Promise.all([
+  const [classResult, membersResult, backgroundsResult] = await Promise.all([
     getClassProfile(),
     getMembers(),
+    getClassBackgrounds(),
   ]);
 
   const klass = classResult.data;
   const members = (membersResult.data ?? []).filter(
     (m) => m.role !== "super_admin",
   );
+  const backgroundUrls = (backgroundsResult.data ?? []).map((bg) => bg.url);
 
   if (!klass && classResult.error) {
     return (
@@ -57,6 +60,7 @@ export default async function LandingPage() {
     <>
       {/* Hero */}
       <section className="pb-12 pt-14 sm:pb-16 sm:pt-20">
+        <MobileBackground urls={backgroundUrls} />
         <div className="flex flex-col items-center gap-5 text-center opacity-80">
           <h1
             className="rise-up text-[22vw] font-extrabold leading-[0.9] tracking-tight text-ink sm:text-8xl lg:text-9xl"

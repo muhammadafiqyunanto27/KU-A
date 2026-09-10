@@ -34,7 +34,7 @@ export function BackgroundCarousel({ urls }: { urls: string[] }) {
           sizes="100vw"
           unoptimized
           className={cn(
-            "object-cover object-center transition-opacity duration-1000 max-sm:scale-110 max-sm:blur-[4px]",
+            "object-cover object-center transition-opacity duration-1000 max-sm:scale-110 max-sm:blur-[7px]",
             i === index ? "opacity-100" : "opacity-0",
           )}
         />
