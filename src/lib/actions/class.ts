@@ -3,13 +3,44 @@
 import { revalidatePath } from "next/cache";
 import { getSessionProfile } from "@/lib/auth";
 import { query, queryOne } from "@/lib/db";
-import type { Role } from "@/lib/types";
+import type { HeroStyle, Role, TextStyle } from "@/lib/types";
 
 type ActionResult = { error: string } | void;
 
 const ALLOWED_ROLES: Role[] = ["super_admin", "ketua_kelas"];
 
 type ClassAdminSession = { ok: true; userId: string } | { ok: false; error: string };
+
+function readTextStyle(prefix: string, fd: FormData): TextStyle | undefined {
+  const out: TextStyle = {};
+
+  const size = Number(fd.get(`${prefix}_size`));
+  if (Number.isFinite(size) && size >= 8 && size <= 220) {
+    out.size = Math.round(size);
+  }
+
+  const color = String(fd.get(`${prefix}_color`) ?? "").trim().toLowerCase();
+  if (/^#[0-9a-f]{6}$/.test(color)) out.color = color;
+
+  const font = String(fd.get(`${prefix}_font`) ?? "").trim();
+  if (["inter", "sans", "serif", "mono"].includes(font)) out.font = font;
+
+  const opacity = Number(fd.get(`${prefix}_opacity`));
+  if (Number.isFinite(opacity) && opacity >= 0.3 && opacity <= 1) {
+    out.opacity = Math.round(opacity * 100) / 100;
+  }
+
+  return Object.keys(out).length ? out : undefined;
+}
+
+function readHeroStyle(fd: FormData): HeroStyle {
+  const style: HeroStyle = {};
+  for (const key of ["class_name", "tagline", "description"] as const) {
+    const value = readTextStyle(key, fd);
+    if (value) style[key] = value;
+  }
+  return style;
+}
 
 async function requireClassAdmin(): Promise<ClassAdminSession> {
   const session = await getSessionProfile();
@@ -42,6 +73,7 @@ export async function updateClassProfileAction(
       address: String(formData.get("contact_address") ?? "").trim() || null,
       schedule: String(formData.get("contact_schedule") ?? "").trim() || null,
     },
+    hero_style: readHeroStyle(formData),
   };
 
   try {
@@ -53,8 +85,8 @@ export async function updateClassProfileAction(
       await query(
         `update class_profile
          set class_name = $2, tagline = $3, description = $4,
-             socials = $5::jsonb, contact = $6::jsonb,
-             updated_by = $7, updated_at = now()
+             socials = $5::jsonb, contact = $6::jsonb, hero_style = $7::jsonb,
+             updated_by = $8, updated_at = now()
          where id = $1`,
         [
           existing.id,
@@ -63,20 +95,22 @@ export async function updateClassProfileAction(
           updates.description,
           JSON.stringify(updates.socials),
           JSON.stringify(updates.contact),
+          JSON.stringify(updates.hero_style),
           guard.userId,
         ],
       );
     } else {
       await query(
         `insert into class_profile
-         (class_name, tagline, description, socials, contact, updated_by)
-         values ($1, $2, $3, $4::jsonb, $5::jsonb, $6)`,
+         (class_name, tagline, description, socials, contact, hero_style, updated_by)
+         values ($1, $2, $3, $4::jsonb, $5::jsonb, $6::jsonb, $7)`,
         [
           updates.class_name,
           updates.tagline,
           updates.description,
           JSON.stringify(updates.socials),
           JSON.stringify(updates.contact),
+          JSON.stringify(updates.hero_style),
           guard.userId,
         ],
       );

@@ -1,9 +1,27 @@
 import { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { CardSlider } from "@/components/public/card-slider";
 import { MemberSliderCard } from "@/components/public/member-slider-card";
 import { EmptyState } from "@/components/public/empty-state";
 import { Marquee } from "@/components/public/marquee";
 import { getClassProfile, getMembers } from "@/lib/data";
+import type { TextStyle } from "@/lib/types";
+
+const FONTS: Record<string, string> = {
+  inter: "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+  sans: "ui-sans-serif, system-ui, -apple-system, sans-serif",
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: 'ui-monospace, "Cascadia Code", "JetBrains Mono", monospace',
+};
+
+function textStyle(style?: TextStyle): CSSProperties {
+  const s: CSSProperties = {};
+  if (style?.size) s.fontSize = `${style.size}px`;
+  if (style?.color) s.color = style.color;
+  if (style?.font) s.fontFamily = FONTS[style.font];
+  if (style?.opacity != null) s.opacity = style.opacity;
+  return s;
+}
 
 export const metadata: Metadata = {
   title: "Profil Kelas",
@@ -40,18 +58,27 @@ export default async function LandingPage() {
       {/* Hero */}
       <section className="pb-8 pt-14 sm:pt-20">
         <div className="flex flex-col items-center gap-5 text-center opacity-80">
-          <h1 className="rise-up text-[22vw] font-extrabold leading-[0.9] tracking-tight text-ink sm:text-8xl lg:text-9xl">
+          <h1
+            className="rise-up text-[22vw] font-extrabold leading-[0.9] tracking-tight text-ink sm:text-8xl lg:text-9xl"
+            style={textStyle(klass?.hero_style?.class_name)}
+          >
             {klass?.class_name ?? "KU-A"}
           </h1>
 
           {klass?.tagline ? (
-            <p className="rise-up rise-up-delay-1 max-w-xl text-xl font-medium text-ink sm:text-2xl">
+            <p
+              className="rise-up rise-up-delay-1 max-w-xl text-xl font-medium text-ink sm:text-2xl"
+              style={textStyle(klass?.hero_style?.tagline)}
+            >
               {klass.tagline}
             </p>
           ) : null}
 
           {klass?.description ? (
-            <p className="rise-up rise-up-delay-2 max-w-2xl text-ink-muted sm:text-lg">
+            <p
+              className="rise-up rise-up-delay-2 max-w-2xl text-ink-muted sm:text-lg"
+              style={textStyle(klass?.hero_style?.description)}
+            >
               {klass.description}
             </p>
           ) : null}

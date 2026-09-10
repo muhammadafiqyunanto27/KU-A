@@ -1,138 +1,223 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import {
+  Children,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
-const AUTOPLAY_MS = 2600;
-const GAP_PX = 16;
+const DRAG_GAIN = 0.45;
+const DECAY = 0.955;
+const AUTOPLAY_DEG_S = 26;
+const SNAP_HOLD_MS = 1900;
+const MAX_SPEED = 7;
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
+
+type Phase = "drag" | "inertia" | "snap" | "idle";
 
 export function CardSlider({ children }: { children: ReactNode }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const drag = useRef({
-    active: false,
-    startX: 0,
-    startScroll: 0,
-    moved: false,
-    lastInteract: 0,
+  const cards = Children.toArray(children);
+  const count = cards.length;
+  const step = count > 1 ? 360 / count : 0;
+
+  const stageRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+
+  const [ready, setReady] = useState(false);
+  const [canvas, setCanvas] = useState({
+    faceW: 180,
+    faceH: 279,
+    radius: 432,
+    persp: 1469,
+    stageH: 452,
   });
 
-  function scrollBySlot(dir: 1 | -1) {
-    const track = trackRef.current;
-    const card = track?.querySelector<HTMLElement>("[data-slide]");
-    if (!track || !card) return;
-    const slot = card.offsetWidth + GAP_PX;
-    const max = track.scrollWidth - track.clientWidth;
-    if (dir > 0 && track.scrollLeft >= max - 4) {
-      track.scrollTo({ left: 0, behavior: "smooth" });
-    } else if (dir < 0 && track.scrollLeft <= 4) {
-      track.scrollTo({ left: max, behavior: "smooth" });
-    } else {
-      track.scrollBy({ left: dir * slot, behavior: "smooth" });
-    }
-  }
-
-  function updateArc() {
-    const track = trackRef.current;
-    if (!track) return;
-    const rect = track.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const cards = track.querySelectorAll<HTMLElement>("[data-slide]");
-    for (const card of cards) {
-      const cardRect = card.getBoundingClientRect();
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      let pct = (cardCenter - center) / (rect.width / 2);
-      pct = Math.max(-1, Math.min(1, pct));
-      const abs = Math.abs(pct);
-      const scale = 1.06 - 0.24 * abs;
-      const rotate = pct * 13;
-      card.style.transform = `scale(${scale}) rotateY(${rotate}deg)`;
-      card.style.zIndex = String(Math.round(30 - abs * 26));
-      card.style.opacity = String(1 - abs * 0.4);
-    }
-  }
+  const rot = useRef(0);
+  const vel = useRef(0);
+  const phase = useRef<Phase>("idle");
+  const lastX = useRef(0);
+  const lastT = useRef(0);
+  const lastInteract = useRef(0);
+  const moved = useRef(false);
+  const reduced = useRef(false);
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    updateArc();
-    track.addEventListener("scroll", updateArc, { passive: true });
-    window.addEventListener("resize", updateArc);
-    return () => {
-      track.removeEventListener("scroll", updateArc);
-      window.removeEventListener("resize", updateArc);
+    reduced.current = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    function measure() {
+      const el = stageRef.current;
+      if (!el) return;
+      const w = el.clientWidth || window.innerWidth;
+      const wide = w >= 640;
+      const faceW = wide
+        ? clamp(Math.round(w * 0.15), 170, 190)
+        : clamp(Math.round(w * 0.42), 130, 150);
+      const faceH = Math.round(faceW * 1.55);
+      const radius = clamp(Math.round(faceW * 2.4), 360, 520);
+      const persp = Math.round(radius * 3.4);
+      const scale = persp / (persp - radius);
+      setCanvas({
+        faceW,
+        faceH,
+        radius,
+        persp,
+        stageH: Math.round(faceH * scale + 56),
+      });
+    }
+
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    if (count < 2) return;
+    let raf = 0;
+    let prev = performance.now();
+
+    const renderRing = () => {
+      if (ringRef.current) {
+        ringRef.current.style.transform = `rotateY(${rot.current.toFixed(3)}deg)`;
+      }
     };
-  }, []);
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => {
-      if (drag.current.active) return;
-      if (Date.now() - drag.current.lastInteract < 3500) return;
-      scrollBySlot(1);
-    }, AUTOPLAY_MS);
-    return () => clearInterval(id);
-  }, []);
+    const tick = (now: number) => {
+      const dt = Math.min(64, now - prev);
+      prev = now;
+
+      if (phase.current === "inertia") {
+        rot.current += vel.current;
+        vel.current *= DECAY;
+        if (Math.abs(vel.current) < 0.3) phase.current = "snap";
+      } else if (phase.current === "snap") {
+        const nearest = Math.round(rot.current / step) * step;
+        const diff = nearest - rot.current;
+        if (Math.abs(diff) < 0.04) {
+          rot.current = nearest;
+          vel.current = 0;
+          phase.current = "idle";
+          lastInteract.current = performance.now();
+        } else {
+          rot.current += diff * 0.14;
+          vel.current = 0;
+        }
+      } else if (
+        phase.current === "idle" &&
+        !reduced.current &&
+        performance.now() - lastInteract.current > SNAP_HOLD_MS
+      ) {
+        rot.current += (AUTOPLAY_DEG_S * dt) / 1000;
+      }
+
+      renderRing();
+      raf = requestAnimationFrame(tick);
+    };
+
+    renderRing();
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [count, step]);
+
+  if (count < 2) return <>{children}</>;
+
+  const { faceW, faceH, radius, persp, stageH } = canvas;
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    drag.current.active = true;
-    drag.current.lastInteract = Date.now();
-    if (e.pointerType !== "mouse" || e.button !== 0) return;
-    const track = trackRef.current;
-    if (!track) return;
-    drag.current = {
-      active: true,
-      startX: e.clientX,
-      startScroll: track.scrollLeft,
-      moved: false,
-      lastInteract: Date.now(),
-    };
-    track.setPointerCapture(e.pointerId);
-    track.style.scrollSnapType = "none";
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    phase.current = "drag";
+    moved.current = false;
+    lastX.current = e.clientX;
+    lastT.current = performance.now();
+    vel.current = 0;
+    stageRef.current?.setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    const track = trackRef.current;
-    if (!track || !drag.current.active || e.pointerType !== "mouse") return;
-    const dx = e.clientX - drag.current.startX;
-    if (Math.abs(dx) > 4) drag.current.moved = true;
-    track.scrollLeft = drag.current.startScroll - dx;
+    if (phase.current !== "drag") return;
+    const dx = e.clientX - lastX.current;
+    const dtMs = Math.max(1, performance.now() - lastT.current);
+    const instVel = ((-dx * DRAG_GAIN) / dtMs) * 16.67;
+    lastX.current = e.clientX;
+    lastT.current = performance.now();
+    if (Math.abs(dx) > 2) moved.current = true;
+
+    vel.current =
+      vel.current === 0
+        ? instVel
+        : vel.current * 0.7 + instVel * 0.3;
+    rot.current -= dx * DRAG_GAIN;
   }
 
-  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    const track = trackRef.current;
-    if (!track) return;
-    if (track.hasPointerCapture(e.pointerId)) {
-      track.releasePointerCapture(e.pointerId);
+  function endDrag() {
+    if (phase.current === "drag") {
+      vel.current = clamp(vel.current, -MAX_SPEED, MAX_SPEED);
+      lastInteract.current = performance.now();
+      phase.current = reduced.current ? "idle" : "inertia";
     }
-    track.style.scrollSnapType = "";
-    if (drag.current.active) {
-      drag.current.active = false;
-      drag.current.lastInteract = Date.now();
-    }
-  }
-
-  function onClickCapture(e: React.MouseEvent) {
-    if (!drag.current.moved) return;
-    e.preventDefault();
-    e.stopPropagation();
-    drag.current.moved = false;
   }
 
   return (
-    <div className="[perspective:1200px]">
-      <div className="relative overflow-x-hidden">
-        <div
-          ref={trackRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onClickCapture={onClickCapture}
-          className="no-scrollbar -mx-4 flex select-none snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scroll-pl-[11vw] scroll-pr-[11vw] scroll-smooth sm:mx-0 sm:px-0 sm:scroll-pl-[calc((100%_-_45%)/2)] sm:scroll-pr-[calc((100%_-_45%)/2)] md:-mx-6 md:px-6 md:scroll-pl-[calc((100%_-_300px)/2)] md:scroll-pr-[calc((100%_-_300px)/2)] lg:cursor-grab lg:active:cursor-grabbing"
-        >
-          {children}
-        </div>
+    <div
+      ref={stageRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onClickCapture={(e) => {
+        if (moved.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          moved.current = false;
+        }
+      }}
+      className="relative w-full touch-pan-y select-none overflow-hidden lg:cursor-grab lg:active:cursor-grabbing"
+      style={{
+        height: stageH,
+        perspective: persp,
+        WebkitMaskImage:
+          "radial-gradient(ellipse 72% 88% at 50% 50%, black 58%, transparent 97%)",
+        maskImage:
+          "radial-gradient(ellipse 72% 88% at 50% 50%, black 58%, transparent 97%)",
+      }}
+    >
+      <div
+        ref={ringRef}
+        className="absolute left-1/2 top-1/2 block h-0 w-0"
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        {cards.map((card, i) => {
+          const delay = count > 18 ? i * 28 : i * 55;
+          return (
+            <div
+              key={i}
+              className="absolute left-0 top-0 will-change-transform [&>*]:flex [&>*]:h-full [&>*]:w-full"
+              style={{
+                width: faceW,
+                height: faceH,
+                marginLeft: -faceW / 2,
+                marginTop: -faceH / 2,
+                transform: `rotateY(${i * step}deg) translateZ(${radius}px)`,
+                transformStyle: "preserve-3d",
+                backfaceVisibility: "hidden",
+                opacity: ready ? 1 : 0,
+                transition: `opacity 0.6s ease ${delay}ms`,
+              }}
+            >
+              {card}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

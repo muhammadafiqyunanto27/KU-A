@@ -48,9 +48,23 @@ export interface ClassProfile {
   logo_url: string | null;
   socials: Socials | null;
   contact: Contact | null;
+  hero_style: HeroStyle | null;
   updated_by: string | null;
   updated_at: string;
 }
+
+export type TextStyle = {
+  size?: number;
+  color?: string;
+  font?: string;
+  opacity?: number;
+};
+
+export type HeroStyle = {
+  class_name?: TextStyle;
+  tagline?: TextStyle;
+  description?: TextStyle;
+};
 
 export interface ClassBackground {
   id: string;

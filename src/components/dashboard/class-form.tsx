@@ -5,7 +5,95 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { updateClassProfileAction } from "@/lib/actions/class";
-import type { ClassProfile } from "@/lib/types";
+import type { ClassProfile, TextStyle } from "@/lib/types";
+
+const FONT_OPTIONS = [
+  { value: "", label: "Inter (default)" },
+  { value: "sans", label: "Sans (sistem)" },
+  { value: "serif", label: "Serif" },
+  { value: "mono", label: "Mono" },
+];
+
+type StylePrefix = "class_name" | "tagline" | "description";
+
+const STYLE_LABELS: Record<StylePrefix, string> = {
+  class_name: "Nama Kelas",
+  tagline: "Tagline",
+  description: "Deskripsi",
+};
+
+function StyleControl({
+  prefix,
+  value,
+}: {
+  prefix: StylePrefix;
+  value?: TextStyle;
+}) {
+  return (
+    <div className="rounded-xl border border-line-strong bg-surface-muted/50 p-3">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        {STYLE_LABELS[prefix]}
+      </p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <label className="grid gap-1">
+          <span className="text-xs text-ink-muted">Ukuran (px)</span>
+          <input
+            type="number"
+            name={`${prefix}_size`}
+            min={8}
+            max={220}
+            defaultValue={value?.size ?? ""}
+            placeholder="Auto"
+            className="h-10 rounded-lg border border-line-strong bg-surface-strong/70 px-3 text-sm text-ink outline-none focus:border-cocoa"
+          />
+        </label>
+        <label className="grid gap-1">
+          <span className="text-xs text-ink-muted">Warna</span>
+          <input
+            type="color"
+            name={`${prefix}_color`}
+            defaultValue={value?.color ?? "#4b5565"}
+            className="h-10 w-full cursor-pointer rounded-lg border border-line-strong bg-surface-strong/70 px-1"
+          />
+        </label>
+        <label className="grid gap-1">
+          <span className="text-xs text-ink-muted">Font</span>
+          <select
+            name={`${prefix}_font`}
+            defaultValue={value?.font ?? ""}
+            className="h-10 rounded-lg border border-line-strong bg-surface-strong/70 px-2 text-sm text-ink outline-none focus:border-cocoa"
+          >
+            {FONT_OPTIONS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-1">
+          <span className="text-xs text-ink-muted">
+            Transparansi{" "}
+            <span className="text-ink-faint">
+              {Math.round((value?.opacity ?? 1) * 100)}%
+            </span>
+          </span>
+          <input
+            type="range"
+            name={`${prefix}_opacity`}
+            min={0.3}
+            max={1}
+            step={0.05}
+            defaultValue={value?.opacity ?? 1}
+            className="h-10 w-full accent-cocoa"
+          />
+        </label>
+      </div>
+      <p className="mt-2 text-[11px] text-ink-faint">
+        Kosongkan ukuran biar pakai ukuran bawaan; warna kosong = ikut tema.
+      </p>
+    </div>
+  );
+}
 
 export function ClassForm({ klass }: { klass: ClassProfile | null }) {
   const [state, action, pending] = useActionState(
@@ -37,6 +125,15 @@ export function ClassForm({ klass }: { klass: ClassProfile | null }) {
         placeholder="Deskripsi profil kelas…"
         rows={4}
       />
+
+      <div className="border-t border-line pt-4">
+        <h3 className="mb-3 text-sm font-semibold text-ink">Tampilan Tulisan (Hero)</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StyleControl prefix="class_name" value={klass?.hero_style?.class_name} />
+          <StyleControl prefix="tagline" value={klass?.hero_style?.tagline} />
+          <StyleControl prefix="description" value={klass?.hero_style?.description} />
+        </div>
+      </div>
 
       <div className="border-t border-line pt-4">
         <h3 className="mb-3 text-sm font-semibold text-ink">Sosial</h3>
