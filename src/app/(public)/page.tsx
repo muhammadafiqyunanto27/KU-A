@@ -56,7 +56,7 @@ export default async function LandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pb-8 pt-14 sm:pt-20">
+      <section className="pb-12 pt-14 sm:pb-16 sm:pt-20">
         <div className="flex flex-col items-center gap-5 text-center opacity-80">
           <h1
             className="rise-up text-[22vw] font-extrabold leading-[0.9] tracking-tight text-ink sm:text-8xl lg:text-9xl"

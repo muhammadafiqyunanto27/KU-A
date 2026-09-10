@@ -46,6 +46,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
   const moved = useRef(false);
   const dragAcc = useRef(0);
   const captured = useRef(false);
+  const hoverCount = useRef(0);
   const reduced = useRef(false);
 
   useEffect(() => {
@@ -118,6 +119,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
       } else if (
         phase.current === "idle" &&
         !reduced.current &&
+        hoverCount.current === 0 &&
         performance.now() - lastInteract.current > SNAP_HOLD_MS
       ) {
         rot.current += (AUTOPLAY_DEG_S * dt) / 1000;
@@ -151,7 +153,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
     if (phase.current !== "drag") return;
     const dx = e.clientX - lastX.current;
     const dtMs = Math.max(1, performance.now() - lastT.current);
-    const instVel = ((-dx * DRAG_GAIN) / dtMs) * 16.67;
+    const instVel = ((dx * DRAG_GAIN) / dtMs) * 16.67;
     lastX.current = e.clientX;
     lastT.current = performance.now();
 
@@ -166,7 +168,7 @@ export function CardSlider({ children }: { children: ReactNode }) {
       vel.current === 0
         ? instVel
         : vel.current * 0.7 + instVel * 0.3;
-    rot.current -= dx * DRAG_GAIN;
+    rot.current += dx * DRAG_GAIN;
   }
 
   function endDrag(e: React.PointerEvent<HTMLDivElement>) {
@@ -215,6 +217,12 @@ export function CardSlider({ children }: { children: ReactNode }) {
           return (
             <div
               key={i}
+              onPointerEnter={() => {
+                hoverCount.current += 1;
+              }}
+              onPointerLeave={() => {
+                hoverCount.current = Math.max(0, hoverCount.current - 1);
+              }}
               className="absolute left-0 top-0 will-change-transform [&>*]:flex [&>*]:h-full [&>*]:w-full"
               style={{
                 width: faceW,
